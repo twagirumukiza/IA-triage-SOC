@@ -2,147 +2,1152 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>IA et triage des alertes en SOC</title>
-<meta name="description" content="Étude scientifique : l’IA dans le triage des alertes des SOC et le rôle modérateur de l’hygiène informatique, du Zero Trust et de la fragmentation des outils.">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>IA et triage SOC</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Cadre conceptuel : l’effet de l’IA sur le triage des alertes des SOC selon l’hygiène informatique, le Zero Trust et la fragmentation des outils.">
+<meta name="author" content="Innocent Twagirumukiza">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Literata:ital,wght@0,400;0,600;1,400;1,600&family=Mrs+Saint+Delafield&family=Noto+Sans+SC:wght@400;500;600&family=Noto+Serif+SC:wght@400;600&display=swap">
 <style>
-:root{--bg:#f5f7f9;--surface:#ffffff;--ink:#16222c;--muted:#52616d;--line:#d5dde3;--accent:#0b6b8a;--accent-ink:#ffffff;--soft:#e4eff4;--fs:100%}
-:root[data-theme="dark"]{--bg:#0d1318;--surface:#141c23;--ink:#dde7ed;--muted:#9bacb7;--line:#2a3640;--accent:#62c4e2;--accent-ink:#0d1318;--soft:#17262e;color-scheme:dark}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0d1318;--surface:#141c23;--ink:#dde7ed;--muted:#9bacb7;--line:#2a3640;--accent:#62c4e2;--accent-ink:#0d1318;--soft:#17262e;color-scheme:dark}}
-*{box-sizing:border-box}
-html{font-size:var(--fs);scroll-behavior:smooth;scroll-padding-top:4.5rem}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:"Charter","Iowan Old Style","Noto Serif SC","Songti SC",Georgia,serif;line-height:1.7;font-size:1.0625rem}
-:lang(zh){line-height:1.9}
-a{color:var(--accent)}
-:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.bar{position:sticky;top:0;z-index:5;background:var(--surface);border-bottom:1px solid var(--line);padding:.5rem 1rem;display:flex;flex-wrap:wrap;gap:.5rem 1rem;align-items:center;justify-content:space-between;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;font-size:.875rem}
-.bar nav{display:flex;gap:1rem;flex-wrap:wrap}
-.bar nav a{color:var(--muted);text-decoration:none}
-.bar nav a:hover{color:var(--accent)}
-.tools{display:flex;gap:.35rem;align-items:center}
-.tools button{font:inherit;background:transparent;color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:.25rem .6rem;cursor:pointer;min-width:2.2rem}
-.tools button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
-.tools button:hover{border-color:var(--accent)}
-.tools .sep{width:1px;height:1.4rem;background:var(--line);margin:0 .25rem}
-main{max-width:46rem;margin:0 auto;padding:0 1.25rem 4rem}
-header.hero{padding:3.5rem 0 1.5rem}
-.kicker{font-family:system-ui,sans-serif;font-size:.85rem;color:var(--muted);margin:0 0 1rem}
-h1{font-size:clamp(2rem,6vw,3.1rem);line-height:1.12;margin:0 0 1rem;font-weight:700;letter-spacing:-.01em}
-.sub{font-size:1.3rem;line-height:1.45;color:var(--muted);margin:0 0 1.5rem}
-.by{font-family:system-ui,sans-serif;font-size:.95rem;margin:0}
-.status{border-left:4px solid var(--accent);background:var(--soft);padding:.8rem 1rem;margin:1.5rem 0;font-family:system-ui,sans-serif;font-size:.95rem}
-figure{margin:2rem 0;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:1rem}
-figure svg{width:100%;height:auto;display:block}
-figcaption{font-family:system-ui,sans-serif;font-size:.85rem;color:var(--muted);margin-top:.5rem}
-.sv-box{fill:var(--surface);stroke:var(--line);stroke-width:1.5}
-.sv-main{fill:var(--accent);stroke:var(--accent)}
-.sv-line{stroke:var(--muted);stroke-width:1.5;fill:none}
-.sv-t{fill:var(--ink);font:600 13.5px system-ui,"Noto Sans SC",sans-serif;text-anchor:middle}
-.sv-s{fill:var(--muted);font:12.5px system-ui,"Noto Sans SC",sans-serif;text-anchor:middle}
-.sv-w{fill:var(--accent-ink);font:600 15px system-ui,"Noto Sans SC",sans-serif;text-anchor:middle}
-section{padding-top:2.5rem}
-h2{font-size:1.65rem;line-height:1.25;margin:0 0 1rem;padding-bottom:.4rem;border-bottom:1px solid var(--line)}
-p{margin:0 0 1rem}
-ul.plain{padding-left:1.2rem;margin:0 0 1rem}
-ul.plain li{margin-bottom:.5rem}
-.def{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:1rem 1.2rem}
-table{width:100%;border-collapse:collapse;font-size:.95rem;background:var(--surface);border:1px solid var(--line)}
-th,td{text-align:left;vertical-align:top;padding:.6rem .8rem;border-bottom:1px solid var(--line)}
-td:first-child{font-family:system-ui,sans-serif;font-weight:600;white-space:nowrap;color:var(--accent)}
-.tw{overflow-x:auto}
-.prop{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:1rem 1.2rem;margin-bottom:1rem}
-.prop h3{font-size:1.1rem;margin:0 0 .5rem}
-.prop h3 b{color:var(--accent);font-family:system-ui,sans-serif;margin-right:.4rem}
-.prop p{margin:0 0 .5rem}
-.prop .ref{color:var(--muted);font-size:.95rem;margin:0}
-.dl{display:grid;gap:.75rem;grid-template-columns:repeat(auto-fit,minmax(11rem,1fr));margin-top:1rem}
-.dl a{display:block;text-align:center;text-decoration:none;font-family:system-ui,sans-serif;background:var(--accent);color:var(--accent-ink);padding:.8rem 1rem;border-radius:8px;font-weight:600}
-.dl a:hover{filter:brightness(1.08)}
-.small{font-size:.9rem;color:var(--muted)}
-footer{border-top:1px solid var(--line);margin-top:3.5rem;padding-top:1.5rem;font-family:system-ui,sans-serif;font-size:.95rem}
-.sig{font-family:"Snell Roundhand","Segoe Script","Brush Script MT",cursive;font-size:1.9rem;margin:0 0 .25rem;color:var(--accent)}
-@media (max-width:560px){.bar nav{display:none}}
-@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+/* Layout: a sticky control bar, a left-aligned hero with a strip of alerts (noise vs signal),
+   then a two-column reading frame (contents on the left, 37rem article on the right). */
+:root{
+  --bg:#F5F7FA; --surface:#FFFFFF; --hl:#EDF1F8;
+  --ink:#121B2B; --ink-2:#364153; --ink-3:#5A667D;
+  --line:#DCE1EA; --line-strong:#AEB8C8;
+  --accent:#1B45C8; --accent-ink:#FFFFFF; --accent-soft:#E7EDFC;
+  --serif:'Literata','Noto Serif SC','Songti SC','STSong','Source Han Serif SC','SimSun',Georgia,'Times New Roman',serif;
+  --sans:'IBM Plex Sans','Noto Sans SC','PingFang SC','Microsoft YaHei',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --script:'Mrs Saint Delafield','Segoe Script','Snell Roundhand',cursive;
+  --zoom:1;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){--bg:#0E1523;--surface:#151E2E;--hl:#1B2639;--ink:#E8ECF4;--ink-2:#C3CBD9;--ink-3:#98A3B8;--line:#26324A;--line-strong:#415073;--accent:#8FB0FF;--accent-ink:#0E1523;--accent-soft:#1A2748; color-scheme:dark}
+}
+:root[data-theme="dark"]{--bg:#0E1523;--surface:#151E2E;--hl:#1B2639;--ink:#E8ECF4;--ink-2:#C3CBD9;--ink-3:#98A3B8;--line:#26324A;--line-strong:#415073;--accent:#8FB0FF;--accent-ink:#0E1523;--accent-soft:#1A2748; color-scheme:dark}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+:lang(zh-Hans){--serif:'Noto Serif SC','Songti SC','STSong','Source Han Serif SC','SimSun','Literata',Georgia,serif}
 
-#content h2{margin-top:2.6rem}
-#content h3{font-size:1.2rem;margin:1.8rem 0 .6rem}
-#content ol,#content ul{padding-left:1.4rem;margin:0 0 1rem}
-#content li{margin-bottom:.5rem}
-.nt{border-left:4px solid var(--accent);background:var(--soft);padding:.8rem 1rem;font-family:system-ui,sans-serif;font-size:.95rem}
+*{box-sizing:border-box}
+html{font-size:calc(100% * var(--zoom));scroll-behavior:smooth;scroll-padding-top:5rem;-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--serif);font-size:1.0625rem;line-height:1.7;text-rendering:optimizeLegibility;overflow-wrap:break-word}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:60;background:var(--bg)}
+:lang(zh-Hans) body,body:lang(zh-Hans){line-height:1.95}
+a{color:var(--accent);text-underline-offset:.18em}
+a:hover{text-decoration-thickness:2px}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+[hidden]{display:none!important}
+
+.wrap{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.frame{max-width:58rem;margin-inline:auto}
+.skip{position:absolute;left:-9999px;top:0;background:var(--accent);color:var(--accent-ink);padding:.6rem 1rem;font:600 14px var(--sans);z-index:100}
+.skip:focus{left:16px;top:calc(env(safe-area-inset-top,0px) + 8px)}
+.progress{position:fixed;top:env(safe-area-inset-top,0px);left:0;right:0;height:2px;z-index:70;background:var(--accent);transform-origin:0 50%;transform:scaleX(var(--p,0))}
+
+/* control bar */
+.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:50;background:var(--bg);border-bottom:1px solid var(--line)}
+.topbar-in{display:flex;align-items:center;gap:8px;min-height:54px}
+.brand{font:600 14px var(--sans);letter-spacing:.02em;color:var(--ink);text-decoration:none;margin-right:auto;white-space:nowrap}
+.brand:hover{color:var(--accent)}
+.ctl{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border:1px solid var(--line-strong);background:transparent;color:var(--ink);border-radius:6px;cursor:pointer;font:600 14px var(--sans);padding:0}
+.ctl:hover:not(:disabled){background:var(--hl)}
+.ctl:disabled{opacity:.38;cursor:default}
+.ctl svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.ctl .sm{font-size:12px}.ctl .lg{font-size:17px}
+.seg{display:inline-flex;border:1px solid var(--line-strong);border-radius:6px;overflow:hidden}
+.seg button{height:36px;min-width:42px;padding:0 10px;border:0;background:transparent;color:var(--ink-2);font:500 13px var(--sans);cursor:pointer}
+.seg button+button{border-left:1px solid var(--line-strong)}
+.seg button:hover{background:var(--hl)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.menu-btn{display:none}
+#theme-btn .i-sun{display:none}
+#theme-btn[data-mode="dark"] .i-sun{display:block}
+#theme-btn[data-mode="dark"] .i-moon{display:none}
+.sizes{display:inline-flex;gap:4px}
+
+/* hero */
+.hero{padding-block:clamp(2rem,6vw,3.75rem) 1.75rem}
+.chips{display:flex;flex-wrap:wrap;gap:.4rem .5rem;margin:0 0 1.1rem;padding:0;list-style:none;font:500 .78rem/1.2 var(--sans);color:var(--ink-2)}
+.chips li{border:1px solid var(--line-strong);padding:.22rem .55rem;border-radius:4px}
+.title{margin:0;font:600 clamp(1.7rem,1.15rem + 2.7vw,2.9rem)/1.15 var(--serif);letter-spacing:-.015em;max-width:24em;text-wrap:balance}
+:lang(zh-Hans) .title{letter-spacing:0;line-height:1.35}
+.byline{margin:1.1rem 0 0;font:500 .95rem var(--sans);color:var(--ink-2)}
+.dl-row{display:flex;flex-wrap:wrap;gap:.6rem;align-items:center;margin-top:1.5rem}
+.dl-label{flex:0 0 100%;font:500 .85rem var(--sans);color:var(--ink-3)}
+.dl{display:inline-flex;align-items:center;gap:.5rem;padding:.55rem .85rem;border:1px solid var(--accent);color:var(--accent);background:transparent;font:600 .9rem/1.2 var(--sans);border-radius:6px;text-decoration:none}
+.dl:hover{background:var(--accent-soft)}
+.dl.is-current{background:var(--accent);color:var(--accent-ink)}
+.dl.is-current:hover{background:var(--accent)}
+.dl svg{width:1.05rem;height:1.05rem;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.dl small{font:400 .78rem var(--sans);opacity:.85}
+.strip{margin:2.25rem 0 0}
+.strip svg{display:block;width:100%;height:4.5rem}
+.strip line{stroke:var(--line-strong);stroke-width:2.2;vector-effect:non-scaling-stroke;stroke-linecap:round;transform-box:fill-box;transform-origin:center;animation:tick .7s ease-out both;animation-delay:calc(var(--i) * 7ms)}
+.strip line.s{stroke:var(--accent);stroke-width:3}
+@keyframes tick{from{transform:scaleY(.12);opacity:.25}}
+.strip figcaption{margin-top:.5rem;font:400 .82rem/1.45 var(--sans);color:var(--ink-3)}
+
+/* reading frame */
+.layout{display:grid;grid-template-columns:minmax(0,1fr);gap:2rem;padding-bottom:2.5rem}
+.toc{font:400 .9rem/1.4 var(--sans)}
+.toc-title{margin:0 0 .6rem;font:600 .9rem var(--sans);color:var(--ink)}
+.toc ol{list-style:none;margin:0;padding:0}
+.toc a{display:block;padding:.38rem .75rem;border-left:2px solid var(--line);color:var(--ink-2);text-decoration:none}
+.toc a:hover{color:var(--ink);border-left-color:var(--line-strong)}
+.toc a.on{color:var(--ink);font-weight:600;border-left-color:var(--accent)}
+.scrim{position:fixed;inset:0;background:rgba(10,16,28,.5);z-index:80}
+article{min-width:0;max-width:37rem}
+@media (min-width:62rem){
+  .layout{grid-template-columns:15rem minmax(0,37rem);gap:3.75rem}
+  .toc{position:sticky;top:4.75rem;align-self:start;max-height:calc(100vh - 6rem);overflow:auto}
+}
+@media (max-width:61.99rem){
+  .menu-btn{display:inline-flex}
+  .toc{position:fixed;z-index:90;inset:0 auto 0 0;width:min(86vw,20rem);background:var(--surface);border-right:1px solid var(--line);padding:calc(env(safe-area-inset-top,0px) + 1rem) 1rem 1.5rem max(16px,env(safe-area-inset-left,0px));overflow:auto;transform:translateX(-102%);visibility:hidden;transition:transform .2s ease,visibility 0s .2s}
+  .toc.open{transform:none;visibility:visible;transition:transform .2s ease}
+}
+
+/* article */
+article h2{margin:3rem 0 1rem;font:600 1.55rem/1.25 var(--sans);letter-spacing:-.01em;text-wrap:balance;scroll-margin-top:5rem}
+article h3{margin:2rem 0 .6rem;font:600 1.1rem/1.4 var(--sans);scroll-margin-top:5rem}
+article p{margin:0 0 1rem;hyphens:auto;-webkit-hyphens:auto}
+:lang(zh-Hans) article p{hyphens:none}
+article ul,article ol{margin:0 0 1.1rem;padding-left:1.4rem}
+article li{margin:.4rem 0;padding-left:.2rem}
+article li::marker{color:var(--ink-3)}
+article strong{font-weight:600}
+article p>strong:first-child{font-family:var(--sans);font-size:.9em}
+.sec:first-child h2{margin-top:0}
+.sec-abstract{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:1.4rem 1.5rem .5rem}
+.sec-abstract h2{font-size:1.2rem;margin:0 0 .8rem}
+.keywords{font:400 .9rem/1.55 var(--sans);color:var(--ink-2)}
+.keywords strong{font-family:var(--sans)}
+blockquote{margin:1.6rem 0;padding:.95rem 0 0;border-top:2px solid var(--accent);font-size:1.13rem;line-height:1.6}
+blockquote p{margin:0}
+.prop{margin:1.5rem 0;padding:1.1rem 1.3rem .35rem;border:1px solid var(--line);background:var(--surface);border-radius:6px}
+.prop h3{display:flex;gap:.75rem;align-items:baseline;margin:0 0 .75rem}
+.code{flex:none;font:500 .8rem/1.3 var(--mono);color:var(--accent);border:1px solid currentColor;padding:.05rem .42rem;border-radius:4px}
+.table-wrap{margin:1.3rem 0;overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:6px}
+.table-wrap table{width:100%;min-width:34rem;border-collapse:collapse;font:400 .88rem/1.5 var(--sans);font-variant-numeric:tabular-nums}
+.table-wrap th,.table-wrap td{padding:.6rem .8rem;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+.table-wrap th{background:var(--hl);font-weight:600;color:var(--ink)}
+.table-wrap tr:last-child td{border-bottom:0}
+@media (max-width:40rem){
+  .table-wrap{overflow:visible;border:0;background:transparent}
+  .table-wrap table,.table-wrap tbody,.table-wrap tr,.table-wrap td{display:block;min-width:0;width:100%}
+  .table-wrap thead{position:absolute;left:-9999px}
+  .table-wrap tr{margin:0 0 .8rem;background:var(--surface);border:1px solid var(--line);border-radius:6px}
+  .table-wrap td{border-bottom:1px solid var(--line)}
+  .table-wrap td:last-child{border-bottom:0}
+  .table-wrap td::before{content:attr(data-label);display:block;font-weight:600;color:var(--ink-3);font-size:.78rem;margin-bottom:.1rem}
+}
+.figure{margin:1.8rem 0}
+.fig-scroll{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:.9rem}
+.fig-scroll svg{display:block;width:100%;min-width:34rem;height:auto}
+.figure figcaption{margin-top:.55rem;font:400 .85rem/1.5 var(--sans);color:var(--ink-3)}
+.fx-edge{fill:none;stroke:var(--line-strong);stroke-width:1.25}
+.fx-dash{stroke-dasharray:4 4}
+.fx-box{fill:var(--surface);stroke:var(--line-strong);stroke-width:1.25}
+.fx-main{fill:var(--accent-soft);stroke:var(--accent);stroke-width:2}
+.fx-dot{fill:var(--line-strong)}
+.fx-arrow{fill:var(--line-strong)}
+.fx-t{fill:var(--ink);font:600 13px var(--sans)}
+.fx-s{fill:var(--ink-3);font:400 11.5px var(--sans)}
+.refs{list-style:none;padding:0!important;font:400 .86rem/1.55 var(--sans);color:var(--ink-2)}
+.refs li{margin:0 0 .7rem;padding-left:1.6rem!important;text-indent:-1.6rem;overflow-wrap:anywhere}
+.refs a{color:var(--accent)}
+
+/* signature */
+.signature{margin:3.5rem 0 1rem;padding-top:1.75rem;border-top:1px solid var(--line-strong)}
+.sig-script{font:400 clamp(3.2rem,9vw,4.6rem)/1 var(--script);color:var(--ink);transform:rotate(-2.5deg);transform-origin:0 100%;margin:0 0 .6rem -.1em;white-space:nowrap}
+.sig-role{margin:0 0 1rem;font:400 .95rem var(--sans);color:var(--ink-2)}
+.sig-link{display:inline-flex;align-items:center;gap:.5rem;padding:.55rem .85rem;border:1px solid var(--accent);border-radius:6px;font:600 .9rem var(--sans);color:var(--accent);text-decoration:none}
+.sig-link:hover{background:var(--accent-soft)}
+.legal{margin:1.4rem 0 0;font:400 .8rem var(--sans);color:var(--ink-3)}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  html{scroll-behavior:auto}
+}
+@media (max-width:30rem){
+  .brand{display:none}
+  .topbar-in{justify-content:space-between}
+  .seg button{min-width:38px;padding:0 8px}
+}
+
 </style>
 </head>
 <body>
-<div class="bar">
-  <nav aria-label="Sections" id="nav"></nav>
-  <div class="tools">
-    <button data-lang="fr" aria-pressed="true">FR</button>
-    <button data-lang="en" aria-pressed="false">EN</button>
-    <button data-lang="zh" aria-pressed="false">中文</button>
-    <span class="sep"></span>
-    <button id="dec" aria-label="A−" title="A−">A−</button>
-    <button id="inc" aria-label="A+" title="A+">A+</button>
-    <span class="sep"></span>
-    <button id="theme" aria-label="Thème" title="Thème">◐</button>
-  </div>
+<a class="skip" id="skip" href="#main-fr" data-i18n="skip">Aller au contenu</a>
+<div class="progress" id="progress" aria-hidden="true"></div>
+<header class="topbar"><div class="wrap"><div class="frame topbar-in">
+<button class="ctl menu-btn" id="menu-btn" type="button" aria-expanded="false" data-i18n-aria="menu"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+<a class="brand" href="https://twagirumukiza.github.io/" target="_blank" rel="noopener">Twagirumukiza</a>
+<div class="seg" role="group" data-i18n-aria="lang">
+<button type="button" data-lang="fr" lang="fr" aria-pressed="true" aria-label="Français">FR</button>
+<button type="button" data-lang="en" lang="en" aria-pressed="false" aria-label="English">EN</button>
+<button type="button" data-lang="zh" lang="zh-Hans" aria-pressed="false" aria-label="中文">中文</button>
 </div>
-<main>
-<header class="hero">
-  <p class="kicker" id="kicker"></p>
-  <h1 id="title"></h1>
-  <p class="sub" id="sub"></p>
-</header>
-<div id="content"></div>
-<section id="download"><h2 id="dlh"></h2><p id="dlt"></p>
-  <div class="dl">
-    <a href="pdf/IA-triage-SOC-fr.pdf" download>PDF · Français</a>
-    <a href="pdf/IA-triage-SOC-en.pdf" download>PDF · English</a>
-    <a href="pdf/IA-triage-SOC-zh.pdf" download>PDF · 中文</a>
-  </div>
-</section>
-<footer>
-  <p class="sig">Innocent Twagirumukiza</p>
-  <p><span id="foot"></span> <a href="https://twagirumukiza.github.io/School-and-AI/" rel="author">twagirumukiza.github.io/School-and-AI</a></p>
-  <p class="small">© 2026 Innocent Twagirumukiza</p>
+<button class="ctl" id="theme-btn" type="button" data-mode="light" data-i18n-aria="theme"><svg class="i-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg><svg class="i-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></button>
+<div class="sizes"><button class="ctl" id="size-down" type="button" data-i18n-aria="smaller"><span class="sm" aria-hidden="true">A−</span></button><button class="ctl" id="size-up" type="button" data-i18n-aria="larger"><span class="lg" aria-hidden="true">A+</span></button></div>
+</div></div></header>
+<div class="scrim" id="scrim" hidden></div>
+<div class="lang-block" data-lang="fr" lang="fr">
+<header class="hero wrap"><div class="frame">
+<ul class="chips"><li>Article conceptuel</li><li>Version préliminaire</li><li>Aucune donnée empirique</li></ul>
+<h1 class="title">L’intelligence artificielle dans le triage des alertes des SOC : le rôle modérateur de l’hygiène informatique, du Zero Trust et de la fragmentation des outils</h1>
+<p class="byline">Innocent Twagirumukiza · Octobre 2026</p>
+<div class="dl-row"><span class="dl-label">Télécharger l’article en PDF</span><a class="dl is-current" href="pdf/IA_triage_alertes_SOC_FR.pdf" data-file="IA_triage_alertes_SOC_FR.pdf" download><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11m0 0l-4.5-4.5M12 15l4.5-4.5M5 20h14"/></svg><span lang="fr">Français</span><small>PDF · 419 Ko</small></a><a class="dl" href="pdf/AI_SOC_alert_triage_EN.pdf" data-file="AI_SOC_alert_triage_EN.pdf" download><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11m0 0l-4.5-4.5M12 15l4.5-4.5M5 20h14"/></svg><span lang="en">English</span><small>PDF · 393 Ko</small></a><a class="dl" href="pdf/AI_SOC_alert_triage_ZH.pdf" data-file="AI_SOC_alert_triage_ZH.pdf" download><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11m0 0l-4.5-4.5M12 15l4.5-4.5M5 20h14"/></svg><span lang="zh-Hans">中文</span><small>PDF · 786 Ko</small></a></div>
+<figure class="strip"><svg viewBox="0 0 1200 120" preserveAspectRatio="none" aria-hidden="true" focusable="false"><line style="--i:0" x1="5" y1="41.7" x2="5" y2="78.3"/><line style="--i:1" x1="15" y1="53.5" x2="15" y2="66.5"/><line style="--i:2" x1="25" y1="47.7" x2="25" y2="72.3"/><line style="--i:3" x1="35" y1="46.0" x2="35" y2="74.0"/><line style="--i:4" x1="45" y1="53.5" x2="45" y2="66.5"/><line style="--i:5" x1="55" y1="48.2" x2="55" y2="71.8"/><line style="--i:6" x1="65" y1="45.5" x2="65" y2="74.5"/><line style="--i:7" x1="75" y1="51.4" x2="75" y2="68.6"/><line style="--i:8" x1="85" y1="54.5" x2="85" y2="65.5"/><line class="s" style="--i:9" x1="95" y1="16.0" x2="95" y2="104.0"/><line style="--i:10" x1="105" y1="41.2" x2="105" y2="78.8"/><line style="--i:11" x1="115" y1="53.3" x2="115" y2="66.7"/><line style="--i:12" x1="125" y1="51.8" x2="125" y2="68.2"/><line style="--i:13" x1="135" y1="49.4" x2="135" y2="70.6"/><line style="--i:14" x1="145" y1="44.3" x2="145" y2="75.7"/><line style="--i:15" x1="155" y1="46.7" x2="155" y2="73.3"/><line style="--i:16" x1="165" y1="45.1" x2="165" y2="74.9"/><line style="--i:17" x1="175" y1="44.1" x2="175" y2="75.9"/><line style="--i:18" x1="185" y1="44.5" x2="185" y2="75.5"/><line style="--i:19" x1="195" y1="53.3" x2="195" y2="66.7"/><line style="--i:20" x1="205" y1="52.5" x2="205" y2="67.5"/><line style="--i:21" x1="215" y1="43.1" x2="215" y2="76.9"/><line style="--i:22" x1="225" y1="43.3" x2="225" y2="76.7"/><line style="--i:23" x1="235" y1="46.0" x2="235" y2="74.0"/><line style="--i:24" x1="245" y1="46.8" x2="245" y2="73.2"/><line style="--i:25" x1="255" y1="43.4" x2="255" y2="76.6"/><line style="--i:26" x1="265" y1="39.7" x2="265" y2="80.3"/><line class="s" style="--i:27" x1="275" y1="16.0" x2="275" y2="104.0"/><line style="--i:28" x1="285" y1="40.2" x2="285" y2="79.8"/><line style="--i:29" x1="295" y1="54.0" x2="295" y2="66.0"/><line style="--i:30" x1="305" y1="48.4" x2="305" y2="71.6"/><line style="--i:31" x1="315" y1="47.7" x2="315" y2="72.3"/><line style="--i:32" x1="325" y1="39.2" x2="325" y2="80.8"/><line style="--i:33" x1="335" y1="43.6" x2="335" y2="76.4"/><line style="--i:34" x1="345" y1="43.3" x2="345" y2="76.7"/><line style="--i:35" x1="355" y1="42.9" x2="355" y2="77.1"/><line style="--i:36" x1="365" y1="54.8" x2="365" y2="65.2"/><line style="--i:37" x1="375" y1="49.4" x2="375" y2="70.6"/><line style="--i:38" x1="385" y1="44.3" x2="385" y2="75.7"/><line style="--i:39" x1="395" y1="40.5" x2="395" y2="79.5"/><line style="--i:40" x1="405" y1="39.9" x2="405" y2="80.1"/><line style="--i:41" x1="415" y1="51.9" x2="415" y2="68.1"/><line style="--i:42" x1="425" y1="52.6" x2="425" y2="67.4"/><line style="--i:43" x1="435" y1="40.0" x2="435" y2="80.0"/><line class="s" style="--i:44" x1="445" y1="16.0" x2="445" y2="104.0"/><line style="--i:45" x1="455" y1="52.6" x2="455" y2="67.4"/><line style="--i:46" x1="465" y1="46.5" x2="465" y2="73.5"/><line style="--i:47" x1="475" y1="48.7" x2="475" y2="71.3"/><line style="--i:48" x1="485" y1="51.6" x2="485" y2="68.4"/><line style="--i:49" x1="495" y1="51.1" x2="495" y2="68.9"/><line style="--i:50" x1="505" y1="47.0" x2="505" y2="73.0"/><line style="--i:51" x1="515" y1="42.1" x2="515" y2="77.9"/><line style="--i:52" x1="525" y1="48.2" x2="525" y2="71.8"/><line style="--i:53" x1="535" y1="52.5" x2="535" y2="67.5"/><line style="--i:54" x1="545" y1="51.4" x2="545" y2="68.6"/><line style="--i:55" x1="555" y1="44.6" x2="555" y2="75.4"/><line style="--i:56" x1="565" y1="54.0" x2="565" y2="66.0"/><line style="--i:57" x1="575" y1="41.6" x2="575" y2="78.4"/><line class="s" style="--i:58" x1="585" y1="16.0" x2="585" y2="104.0"/><line style="--i:59" x1="595" y1="51.1" x2="595" y2="68.9"/><line style="--i:60" x1="605" y1="44.3" x2="605" y2="75.7"/><line style="--i:61" x1="615" y1="45.0" x2="615" y2="75.0"/><line style="--i:62" x1="625" y1="51.3" x2="625" y2="68.7"/><line style="--i:63" x1="635" y1="47.7" x2="635" y2="72.3"/><line style="--i:64" x1="645" y1="51.1" x2="645" y2="68.9"/><line style="--i:65" x1="655" y1="46.5" x2="655" y2="73.5"/><line style="--i:66" x1="665" y1="42.4" x2="665" y2="77.6"/><line style="--i:67" x1="675" y1="44.0" x2="675" y2="76.0"/><line style="--i:68" x1="685" y1="51.9" x2="685" y2="68.1"/><line style="--i:69" x1="695" y1="52.8" x2="695" y2="67.2"/><line style="--i:70" x1="705" y1="50.6" x2="705" y2="69.4"/><line style="--i:71" x1="715" y1="53.5" x2="715" y2="66.5"/><line style="--i:72" x1="725" y1="52.5" x2="725" y2="67.5"/><line style="--i:73" x1="735" y1="53.6" x2="735" y2="66.4"/><line style="--i:74" x1="745" y1="52.3" x2="745" y2="67.7"/><line style="--i:75" x1="755" y1="51.9" x2="755" y2="68.1"/><line style="--i:76" x1="765" y1="41.6" x2="765" y2="78.4"/><line style="--i:77" x1="775" y1="38.2" x2="775" y2="81.8"/><line style="--i:78" x1="785" y1="40.4" x2="785" y2="79.6"/><line style="--i:79" x1="795" y1="44.6" x2="795" y2="75.4"/><line style="--i:80" x1="805" y1="44.5" x2="805" y2="75.5"/><line class="s" style="--i:81" x1="815" y1="16.0" x2="815" y2="104.0"/><line style="--i:82" x1="825" y1="51.4" x2="825" y2="68.6"/><line style="--i:83" x1="835" y1="48.5" x2="835" y2="71.5"/><line style="--i:84" x1="845" y1="39.4" x2="845" y2="80.6"/><line style="--i:85" x1="855" y1="44.8" x2="855" y2="75.2"/><line style="--i:86" x1="865" y1="53.6" x2="865" y2="66.4"/><line style="--i:87" x1="875" y1="46.7" x2="875" y2="73.3"/><line style="--i:88" x1="885" y1="44.1" x2="885" y2="75.9"/><line style="--i:89" x1="895" y1="49.2" x2="895" y2="70.8"/><line style="--i:90" x1="905" y1="51.6" x2="905" y2="68.4"/><line style="--i:91" x1="915" y1="52.1" x2="915" y2="67.9"/><line style="--i:92" x1="925" y1="43.4" x2="925" y2="76.6"/><line style="--i:93" x1="935" y1="40.0" x2="935" y2="80.0"/><line style="--i:94" x1="945" y1="44.6" x2="945" y2="75.4"/><line style="--i:95" x1="955" y1="40.2" x2="955" y2="79.8"/><line style="--i:96" x1="965" y1="51.9" x2="965" y2="68.1"/><line style="--i:97" x1="975" y1="46.0" x2="975" y2="74.0"/><line style="--i:98" x1="985" y1="38.2" x2="985" y2="81.8"/><line style="--i:99" x1="995" y1="46.3" x2="995" y2="73.7"/><line style="--i:100" x1="1005" y1="38.3" x2="1005" y2="81.7"/><line style="--i:101" x1="1015" y1="49.2" x2="1015" y2="70.8"/><line style="--i:102" x1="1025" y1="43.8" x2="1025" y2="76.2"/><line class="s" style="--i:103" x1="1035" y1="16.0" x2="1035" y2="104.0"/><line style="--i:104" x1="1045" y1="43.1" x2="1045" y2="76.9"/><line style="--i:105" x1="1055" y1="48.4" x2="1055" y2="71.6"/><line style="--i:106" x1="1065" y1="44.6" x2="1065" y2="75.4"/><line style="--i:107" x1="1075" y1="53.6" x2="1075" y2="66.4"/><line style="--i:108" x1="1085" y1="48.9" x2="1085" y2="71.1"/><line style="--i:109" x1="1095" y1="52.3" x2="1095" y2="67.7"/><line style="--i:110" x1="1105" y1="40.5" x2="1105" y2="79.5"/><line style="--i:111" x1="1115" y1="40.5" x2="1115" y2="79.5"/><line style="--i:112" x1="1125" y1="41.9" x2="1125" y2="78.1"/><line style="--i:113" x1="1135" y1="54.8" x2="1135" y2="65.2"/><line style="--i:114" x1="1145" y1="42.4" x2="1145" y2="77.6"/><line style="--i:115" x1="1155" y1="43.4" x2="1155" y2="76.6"/><line style="--i:116" x1="1165" y1="38.7" x2="1165" y2="81.3"/><line style="--i:117" x1="1175" y1="49.4" x2="1175" y2="70.6"/><line style="--i:118" x1="1185" y1="42.1" x2="1185" y2="77.9"/><line style="--i:119" x1="1195" y1="40.5" x2="1195" y2="79.5"/></svg><figcaption>Chaque trait est une alerte ; seules quelques-unes sont un signal.</figcaption></figure>
+</div></header>
+<div class="wrap"><div class="frame layout">
+<nav class="toc" aria-label="Sommaire"><p class="toc-title">Sommaire</p><ol><li><a href="#fr-abstract">Résumé</a></li><li><a href="#fr-s1">1. Introduction</a></li><li><a href="#fr-s2">2. Revue de la littérature</a></li><li><a href="#fr-s3">3. Cadre conceptuel</a></li><li><a href="#fr-s4">4. Propositions de recherche</a></li><li><a href="#fr-s5">5. Méthodologie de validation proposée</a></li><li><a href="#fr-s6">6. Discussion</a></li><li><a href="#fr-s7">7. Limites et perspectives</a></li><li><a href="#fr-s8">8. Conclusion</a></li><li><a href="#fr-refs">Bibliographie</a></li></ol></nav>
+<article id="main-fr" tabindex="-1">
+<section class="sec sec-abstract" id="fr-abstract"><h2>Résumé</h2><p>L’effet de l’intelligence artificielle (IA) sur le triage des alertes d’un centre opérationnel de sécurité (SOC) dépend de la qualité de l’environnement dans lequel elle est déployée. Cet article propose un cadre conceptuel pour examiner cette thèse. Sa question de recherche est la suivante : si et comment la maturité de l’hygiène informatique, la cohérence de la mise en œuvre du Zero Trust et le degré de fragmentation des outils modifient l’effet de l’IA, par rapport à un triage conventionnel, sur la qualité de détection et sur le coût d’investigation.</p><p>Le cadre distingue le volume informationnel du bruit informationnel. Il traite l’usage de l’IA comme variable centrale, les trois facteurs comme modérateurs, et le volume d’alertes ainsi que la complexité de configuration des règles comme variables de contrôle. Quatre propositions de recherche sont formulées, chacune assortie de sa direction attendue et de son critère de réfutation. Un protocole de validation en trois phases est proposé : une revue ciblée reproductible, une étude qualitative exploratoire, puis une analyse multiniveau complétée par un rejeu d’alertes étiquetées.</p><p>L’article ne rapporte aucun résultat empirique. Il vise à fournir une base testable pour déterminer dans quelles conditions l’IA réduit réellement le bruit informationnel plutôt qu’elle n’automatise les défauts existants.</p><p class="keywords"><strong>Mots-clés :</strong> SOC ; triage des alertes ; bruit informationnel ; intelligence artificielle ; hygiène informatique ; Zero Trust ; fragmentation des outils ; effet de modération ; décision humaine.</p></section><section class="sec" id="fr-s1"><h2>1. Introduction</h2><p>Les SOC concentrent la surveillance, la détection, l’analyse et la réponse aux incidents. Ils s’appuient sur des solutions de gestion des événements de sécurité, de détection sur les terminaux, de renseignement sur les menaces et d’orchestration des réponses. La multiplication des environnements cloud, la généralisation des identités numériques et la croissance des sources de télémétrie augmentent le volume de données à exploiter, et les organisations empilent des outils spécialisés pour couvrir des périmètres toujours plus étendus.</p><p>La littérature décrit les conséquences humaines de cette situation. Tariq et al. (2025) dressent un état des lieux de la recherche sur la fatigue des alertes dans les SOC. Alahmadi et al. (2022) et Kokulu et al. (2019) rapportent, à partir d’entretiens avec des analystes, les difficultés liées à la pertinence des alarmes et à l’adéquation entre outils, processus et personnes. Vielberth et al. (2020) proposent une étude systématique des SOC et de leurs défis ouverts. Ofte et Katsikas (2023) examinent la conscience situationnelle des opérateurs.</p><p>Face à ces difficultés, l’IA est de plus en plus présentée comme un levier de priorisation, de corrélation et de synthèse des alertes. Chhetri et al. (2024) étudient à cet égard la coopération entre analystes et IA. Mais l’IA s’insère dans un environnement déjà structuré, avec ses règles de détection, ses outils et ses pratiques de sécurité, et rien ne permet de supposer que son apport soit identique d’un SOC à l’autre.</p><h3 id="fr-s1-1">1.1 La lacune visée</h3><p>Les travaux cités examinent le plus souvent la charge d’alertes, la coopération humain-IA ou la conscience situationnelle. L’articulation entre l’effet de l’IA et la qualité de l’environnement technique et organisationnel est moins formalisée. L’hypothèse de travail de cet article est que cette lacune existe et qu’elle est importante ; la revue ciblée décrite en section 5 doit le confirmer ou l’infirmer avant toute soumission.</p><p>Une IA de triage consomme du contexte : identifiants d’actifs, propriétaires, historique des comptes, état des correctifs, posture des terminaux, journaux issus de plusieurs outils. Si ce contexte est incomplet, incohérent ou dispersé, l’IA peut aller plus vite sans mieux décider. À l’inverse, un environnement maîtrisé peut permettre à l’IA de produire un gain réel. Le contexte n’est donc pas une simple variable de confusion : il peut conditionner l’effet que l’on cherche à mesurer.</p><h3 id="fr-s1-2">1.2 Question de recherche</h3><blockquote>
+<p>Comment la maturité de l’hygiène informatique, la cohérence de la mise en œuvre du Zero Trust et le degré de fragmentation des outils modifient-ils l’effet de l’intelligence artificielle, par rapport à un triage conventionnel, sur la qualité de détection et sur le coût d’investigation lors du triage des alertes dans les SOC ?</p>
+</blockquote><p>Trois sous-questions la déclinent :</p><ol>
+<li><strong>SQ1 (hygiène).</strong> L’avantage de l’IA sur le triage conventionnel est-il plus marqué lorsque l’hygiène informatique est plus mature ?</li>
+<li><strong>SQ2 (fragmentation).</strong> Cet avantage diminue-t-il lorsque les outils sont fragmentés et peu interopérables, ou l’IA compense-t-elle au contraire cette fragmentation ?</li>
+<li><strong>SQ3 (Zero Trust).</strong> Pour les alertes liées aux identités et aux accès, une mise en œuvre cohérente du Zero Trust accroît-elle l’avantage de l’IA ?</li>
+</ol><p>Les deux résultats sont examinés ensemble : un gain de temps obtenu au prix de menaces manquées ne constitue pas une amélioration.</p><h3 id="fr-s1-3">1.3 Contributions et plan</h3><p>L’article apporte trois éléments : une définition fonctionnelle du bruit informationnel distincte du volume et de la fatigue des alertes ; un cadre de modération dans lequel l’IA est la variable centrale et trois caractéristiques de l’environnement sont des modérateurs ; quatre propositions falsifiables avec un protocole de validation. La section 2 examine la littérature, la section 3 présente le cadre, la section 4 formule les propositions, la section 5 décrit la méthode de validation, et les sections 6 à 8 traitent de la discussion, des limites et de la conclusion.</p></section><section class="sec" id="fr-s2"><h2>2. Revue de la littérature</h2><p>Cette revue est volontairement ciblée sur ce qui fonde le modèle. Elle reste préliminaire : la section 5 prévoit une revue reproductible avant soumission.</p><h3 id="fr-s2-1">2.1 Volume d’alertes et fatigue</h3><p>La fatigue des alertes désigne la dégradation de l’attention ou de la vigilance susceptible d’apparaître lorsque les analystes traitent de nombreuses alertes dont la pertinence est faible ou difficile à établir (Tariq et al., 2025). Le nombre d’alertes mesure la charge, pas la difficulté du travail : deux SOC recevant autant d’alertes peuvent faire face à des efforts très différents selon le contexte disponible, la redondance et les procédures d’investigation. Il faut donc distinguer le volume d’événements collectés, le volume d’alertes générées, la proportion d’alertes pertinentes, la difficulté de qualification et la qualité des décisions finales.</p><h3 id="fr-s2-2">2.2 L’IA dans le triage et la coopération humain-IA</h3><p>L’IA peut prioriser des alertes, rapprocher des événements, résumer un contexte et automatiser des tâches répétitives. Chhetri et al. (2024) soutiennent l’intérêt d’une coopération où l’automatisation traite les tâches adaptées et où l’expertise humaine reste mobilisée pour les cas ambigus. Les travaux sur l’automatisation montrent toutefois que la confiance excessive et la complaisance sont des risques connus (Parasuraman et Riley, 1997 ; Parasuraman et Manzey, 2010). Une IA qui traite plus d’alertes en moins de temps n’améliore donc la sécurité que si le risque de manquer une menace pertinente ne s’accroît pas. Cette réserve justifie de mesurer ensemble le coût d’investigation et la qualité de détection.</p><h3 id="fr-s2-3">2.3 Fragmentation des outils et perte de contexte</h3><p>Les SOC combinent plusieurs technologies spécialisées. Cette diversité améliore la couverture mais peut dégrader l’intégration : identifiants différents pour un même actif, alertes redondantes, contexte à reconstituer manuellement à travers plusieurs interfaces. Kokulu et al. (2019) documentent des décalages entre technologies, processus et personnes dans les SOC. La variable pertinente n’est pas le nombre de produits, mais l’interopérabilité, la cohérence sémantique des données et le partage du contexte entre composants. Un environnement composé de nombreux outils bien intégrés n’est pas fragmenté au sens de ce modèle.</p><h3 id="fr-s2-4">2.4 Hygiène informatique</h3><p>L’hygiène informatique regroupe les pratiques de base qui maintiennent un environnement maîtrisé : inventaire des actifs, gestion des correctifs, administration des comptes et des privilèges, configuration sécurisée. L’ANSSI (2017) en propose un référentiel de mesures. Pour un SOC, ces pratiques déterminent la facilité avec laquelle une alerte peut être rattachée à un actif et à un responsable, et la stabilité des comportements de référence. Une amélioration de l’hygiène peut cependant révéler des événements jusque-là invisibles et augmenter temporairement les détections ; l’effet attendu porte donc sur l’interprétabilité des alertes, pas sur leur nombre.</p><h3 id="fr-s2-5">2.5 Zero Trust</h3><p>Le Zero Trust repose sur la vérification explicite des accès, le moindre privilège et l’évaluation du contexte et du risque à chaque demande (Rose et al., 2020). Le modèle de maturité de la CISA (2023) structure sa mise en œuvre en piliers, dont l’identité et les terminaux. Les contrôles associés produisent des informations sur les identités, les appareils et les conditions d’accès qui, corrélées à d’autres sources, peuvent aider à qualifier une alerte d’accès. Mais des politiques mal harmonisées peuvent aussi multiplier les refus et les changements de contexte. Le Zero Trust n’est donc ni une source intrinsèque de bruit ni une garantie de réduction du bruit. Son rôle dans ce modèle est restreint aux alertes liées aux identités et aux accès, où il fournit du contexte.</p><h3 id="fr-s2-6">2.6 Synthèse et appui actuel</h3><p>Le tableau suivant indique, pour chaque élément du modèle, le rôle supposé et le degré d’appui documentaire dont dispose actuellement cet article. Il met en évidence les parties à consolider par la revue ciblée.</p><div aria-label="Tableau" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th>Élément</th>
+<th>Rôle supposé dans le modèle</th>
+<th>Appui documentaire actuel</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Élément">Fatigue et volume d’alertes</td>
+<td data-label="Rôle supposé dans le modèle">Variable de contrôle</td>
+<td data-label="Appui documentaire actuel">Solide (Tariq et al., 2025 ; Alahmadi et al., 2022)</td>
+</tr>
+<tr>
+<td data-label="Élément">Coopération humain-IA</td>
+<td data-label="Rôle supposé dans le modèle">Cadre du triage assisté</td>
+<td data-label="Appui documentaire actuel">Partiel (Chhetri et al., 2024 ; Parasuraman et Manzey, 2010)</td>
+</tr>
+<tr>
+<td data-label="Élément">Fragmentation des outils</td>
+<td data-label="Rôle supposé dans le modèle">Modérateur</td>
+<td data-label="Appui documentaire actuel">Partiel, surtout qualitatif (Kokulu et al., 2019)</td>
+</tr>
+<tr>
+<td data-label="Élément">Hygiène informatique</td>
+<td data-label="Rôle supposé dans le modèle">Modérateur</td>
+<td data-label="Appui documentaire actuel">Référentiels (ANSSI, 2017), peu de travaux sur le lien avec le SOC</td>
+</tr>
+<tr>
+<td data-label="Élément">Zero Trust</td>
+<td data-label="Rôle supposé dans le modèle">Modérateur, alertes d’identité et d’accès</td>
+<td data-label="Appui documentaire actuel">Référentiels (Rose et al., 2020 ; CISA, 2023), peu de travaux sur le lien avec le SOC</td>
+</tr>
+<tr>
+<td data-label="Élément">Interaction entre ces facteurs et l’IA</td>
+<td data-label="Rôle supposé dans le modèle">Cœur de la contribution</td>
+<td data-label="Appui documentaire actuel">À établir par la revue ciblée</td>
+</tr>
+</tbody>
+</table></div><p>La lacune est donc moins l’absence de littérature sur chacun des facteurs que l’absence, à notre connaissance, d’un cadre qui les articule comme modérateurs de l’effet de l’IA sur le triage.</p></section><section class="sec" id="fr-s3"><h2>3. Cadre conceptuel</h2><h3 id="fr-s3-1">3.1 Définition du bruit informationnel</h3><p>Le bruit informationnel désigne la part de l’information de sécurité qui, dans un contexte opérationnel donné, mobilise des ressources d’analyse sans contribuer proportionnellement à l’identification, à la qualification ou à la gestion des menaces pertinentes.</p><p>Cette définition est fonctionnelle. Une alerte non malveillante n’est pas forcément du bruit : elle peut vérifier la couverture d’un contrôle ou révéler une mauvaise configuration. Le bruit se juge au regard de la finalité de l’investigation, de la valeur du signal et de l’effort nécessaire à son exploitation. Il se distingue du volume, qui est une quantité, et de la fatigue des alertes, qui est une conséquence humaine possible d’une exposition répétée à une charge difficile à gérer.</p><h3 id="fr-s3-2">3.2 Variables du modèle</h3><p>Le modèle pose une question d’écart : l’IA fait-elle mieux ou moins cher qu’un triage conventionnel, et cet écart varie-t-il avec l’environnement ? Il retient une variable centrale, trois modérateurs, deux résultats et un ensemble de variables de contrôle. La figure ci-dessous en donne la structure et le tableau les définitions de travail.</p><figure class="figure"><div class="fig-scroll"><svg viewBox="0 0 760 448" role="img" aria-label="Schéma du modèle : trois modérateurs (hygiène informatique, Zero Trust, fragmentation des outils) agissent sur l’écart entre triage assisté par IA et triage conventionnel, qui détermine la qualité de détection et le coût d’investigation ; des variables de contrôle s’appliquent aux deux conditions." xmlns="http://www.w3.org/2000/svg">
+<defs><marker id="arrow-fr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path class="fx-arrow" d="M0 0L10 5L0 10z"/></marker></defs>
+<g class="fx-edge">
+<path d="M132 112V164H290V246" marker-end="url(#arrow-fr)"/><path d="M380 112V246" marker-end="url(#arrow-fr)"/><path d="M628 112V164H460V246" marker-end="url(#arrow-fr)"/>
+<path d="M224 250H500"/><path d="M500 250V320H518" marker-end="url(#arrow-fr)"/><path d="M500 320V396H518" marker-end="url(#arrow-fr)"/>
+<path class="fx-dash" d="M452 372H498" marker-end="url(#arrow-fr)"/>
+</g>
+<circle class="fx-dot" cx="500" cy="250" r="4"/>
+<rect class="fx-box" x="24" y="56" width="216" height="56" rx="8"/>
+<text class="fx-t" x="132" y="80" text-anchor="middle">M1 · Hygiène informatique</text><text class="fx-s" x="132" y="96" text-anchor="middle">maturité des pratiques</text>
+<rect class="fx-box" x="272" y="56" width="216" height="56" rx="8"/>
+<text class="fx-t" x="380" y="80" text-anchor="middle">M2 · Zero Trust</text><text class="fx-s" x="380" y="96" text-anchor="middle">cohérence · alertes d’accès</text>
+<rect class="fx-box" x="520" y="56" width="216" height="56" rx="8"/>
+<text class="fx-t" x="628" y="80" text-anchor="middle">M3 · Fragmentation</text><text class="fx-s" x="628" y="96" text-anchor="middle">interopérabilité des outils</text>
+<rect class="fx-main" x="24" y="222" width="200" height="56" rx="8"/>
+<text class="fx-t" x="124" y="246" text-anchor="middle">Triage assisté par IA</text><text class="fx-s" x="124" y="262" text-anchor="middle">vs triage conventionnel</text>
+<text class="fx-s" x="362" y="272" text-anchor="middle">écart Δ : IA moins conventionnel</text>
+<rect class="fx-box" x="520" y="292" width="216" height="56" rx="8"/>
+<text class="fx-t" x="628" y="316" text-anchor="middle">Y1 · Qualité de détection</text><text class="fx-s" x="628" y="332" text-anchor="middle">précision, rappel</text>
+<rect class="fx-box" x="520" y="368" width="216" height="56" rx="8"/>
+<text class="fx-t" x="628" y="392" text-anchor="middle">Y2 · Coût d’investigation</text><text class="fx-s" x="628" y="408" text-anchor="middle">temps, sources, effort manuel</text>
+<rect class="fx-box fx-dash" x="24" y="336" width="428" height="72" rx="8"/>
+<text class="fx-t" x="40" y="360">Variables de contrôle</text><text class="fx-s" x="40" y="376">Volume d’alertes, complexité des règles,</text><text class="fx-s" x="40" y="392">taille de l’équipe, périmètre, type d’IA</text>
+</svg></div><figcaption>Figure 1. Modèle de modération : une variable centrale, trois modérateurs, deux résultats.</figcaption></figure><p>Les trois modérateurs agissent sur l’écart entre IA et triage conventionnel, pas directement sur les résultats ; les variables de contrôle agissent sur les deux conditions comparées.</p><div aria-label="Tableau" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th>Rôle</th>
+<th>Variable</th>
+<th>Définition de travail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Rôle">Centrale</td>
+<td data-label="Variable">Triage assisté par IA</td>
+<td data-label="Définition de travail">Usage de l’IA pour prioriser, corréler ou synthétiser les alertes, comparé à un triage conventionnel fondé sur des règles et des procédures manuelles. Décrit par ses fonctions, son niveau d’automatisation et la supervision humaine.</td>
+</tr>
+<tr>
+<td data-label="Rôle">Modérateur M1</td>
+<td data-label="Variable">Maturité de l’hygiène informatique</td>
+<td data-label="Définition de travail">Complétude de l’inventaire des actifs, conformité des correctifs, maîtrise des comptes et des privilèges, configurations maintenues.</td>
+</tr>
+<tr>
+<td data-label="Rôle">Modérateur M2</td>
+<td data-label="Variable">Cohérence de la mise en œuvre du Zero Trust</td>
+<td data-label="Définition de travail">Harmonisation des politiques d’accès et intégration des données d’identité et de terminaux. Appliqué aux alertes liées aux identités et aux accès.</td>
+</tr>
+<tr>
+<td data-label="Rôle">Modérateur M3</td>
+<td data-label="Variable">Fragmentation des outils</td>
+<td data-label="Définition de travail">Faible interopérabilité effective : identifiants non communs pour un même actif, contexte dispersé, nombre d’interfaces à consulter par alerte.</td>
+</tr>
+<tr>
+<td data-label="Rôle">Résultat Y1</td>
+<td data-label="Variable">Qualité de détection</td>
+<td data-label="Définition de travail">Précision, rappel et taux de faux négatifs sur les alertes pertinentes.</td>
+</tr>
+<tr>
+<td data-label="Rôle">Résultat Y2</td>
+<td data-label="Variable">Coût d’investigation</td>
+<td data-label="Définition de travail">Temps de qualification, nombre de sources consultées, effort manuel par alerte.</td>
+</tr>
+<tr>
+<td data-label="Rôle">Contrôle</td>
+<td data-label="Variable">Volume et configuration</td>
+<td data-label="Définition de travail">Volume d’alertes, complexité de configuration des règles, taille et expérience de l’équipe, périmètre surveillé, type d’IA.</td>
+</tr>
+</tbody>
+</table></div><h3 id="fr-s3-3">3.3 Lecture du modèle</h3><p>Soit Δ l’écart de performance entre un triage assisté par IA et un triage conventionnel, mesuré séparément sur Y1 et sur Y2. Un modérateur est une variable qui fait varier Δ : l’effet de l’IA n’est pas supposé constant, il est supposé conditionnel. Le modèle ne dit pas que l’IA est efficace ou inefficace en général ; il dit où et à quelles conditions son effet change.</p><p>Trois précisions encadrent cette lecture.</p><ol>
+<li><strong>Maturité et cohérence sont deux construits distincts.</strong> L’hygiène se mesure par une maturité de pratiques, le Zero Trust par la cohérence d’une architecture et de ses politiques. Ils seront opérationnalisés séparément (section 5).</li>
+<li><strong>Le volume et la complexité des règles sont des contrôles, non des objets d’étude.</strong> Ils influencent la charge d’alertes dans les deux conditions comparées, mais le cadre ne cherche pas à expliquer leur effet propre.</li>
+<li><strong>Des lectures concurrentes existent.</strong> L’hygiène peut aussi agir comme un facteur qui modifie le nombre d’alertes (effet direct), et les SOC les plus matures peuvent être ceux qui adoptent l’IA en premier (biais de sélection). Le protocole de la section 5 prévoit des comparaisons à l’intérieur d’un même SOC pour limiter ce second risque.</li>
+</ol></section><section class="sec" id="fr-s4"><h2>4. Propositions de recherche</h2><p>Les quatre propositions suivantes sont des énoncés théoriques à tester, non des résultats. Chacune précise l’effet attendu, le mécanisme et ce qui la réfuterait. L’« avantage de l’IA » désigne, pour chaque résultat, l’écart favorable à l’IA par rapport au triage conventionnel : une qualité de détection plus élevée ou un coût d’investigation plus faible.</p><div class="prop" id="fr-p1"><h3><span class="code">P1</span>Effet de référence : le gain porte d’abord sur le coût</h3><p><strong>Énoncé.</strong> En moyenne, le triage assisté par IA réduit le coût d’investigation (Y2) par rapport au triage conventionnel, mais cette réduction ne suffit pas à établir une amélioration de la qualité de détection (Y1), dont l’écart peut être nul, positif ou négatif.</p><p><strong>Mécanisme.</strong> L’IA agit d’abord sur la rapidité de qualification par la priorisation et la synthèse. La qualité de détection dépend de la justesse des classements et du risque de masquer une alerte importante, risque connu des systèmes d’aide à la décision (Parasuraman et Manzey, 2010).</p><p><strong>Réfutation.</strong> P1 est réfutée si le coût n’est pas inférieur sous IA, ou si l’avantage sur Y1 est positif de façon uniforme dans tous les environnements, ce qui rendrait inutile de distinguer les deux résultats.</p></div><div class="prop" id="fr-p2"><h3><span class="code">P2</span>Hygiène informatique : l’avantage croît avec la maturité</h3><p><strong>Énoncé.</strong> À volume d’alertes contrôlé, l’avantage de l’IA sur Y1 et sur Y2 est d’autant plus grand que la maturité de l’hygiène informatique (M1) est élevée.</p><p><strong>Mécanisme.</strong> Un inventaire complet, des comptes maîtrisés et des configurations stables permettent à l’IA de rattacher chaque alerte à un actif et à un responsable, et de s’appuyer sur des comportements de référence stables.</p><p><strong>Précaution.</strong> Une meilleure hygiène peut révéler des événements jusque-là invisibles et accroître temporairement le nombre de détections ; d’où le contrôle du volume.</p><p><strong>Réfutation.</strong> L’interaction entre l’usage de l’IA et M1 est nulle ou de signe opposé après contrôle du volume.</p></div><div class="prop" id="fr-p3"><h3><span class="code">P3</span>Fragmentation des outils : l’avantage décroît, ou l’IA compense</h3><p><strong>Énoncé.</strong> L’avantage de l’IA sur Y1 et sur Y2 est d’autant plus faible que les outils sont fragmentés et peu interopérables (M3).</p><p><strong>Mécanisme.</strong> Des identifiants incohérents et un contexte dispersé limitent la capacité de l’IA à rapprocher les données ; ses sorties reposent alors sur un contexte partiel.</p><p><strong>Proposition concurrente.</strong> L’IA pourrait au contraire compenser la fragmentation en corrélant des sources dispersées que l’analyste doit sinon consulter une à une. L’avantage serait alors plus marqué en environnement fragmenté. Ces deux lectures s’opposent et sont discriminables par les données ; les départager est un apport possible de l’étude.</p><p><strong>Réfutation.</strong> L’interaction entre l’usage de l’IA et M3 est nulle ou positive. Une interaction positive soutiendrait la lecture concurrente.</p></div><div class="prop" id="fr-p4"><h3><span class="code">P4</span>Zero Trust : l’avantage croît avec la cohérence, pour les alertes d’accès</h3><p><strong>Énoncé.</strong> Pour les alertes liées aux identités et aux accès, l’avantage de l’IA sur Y1 et sur Y2 est d’autant plus grand que la mise en œuvre du Zero Trust (M2) est cohérente, c’est-à-dire que les politiques sont harmonisées et que les données d’identité et de terminaux sont intégrées.</p><p><strong>Mécanisme.</strong> Les contrôles Zero Trust produisent du contexte exploitable pour qualifier une alerte d’accès : posture du terminal, risque de la session, décision d’accès appliquée.</p><p><strong>Précaution.</strong> Des politiques mal harmonisées peuvent multiplier les refus et les changements de contexte, et réduire l’apport du Zero Trust au triage.</p><p><strong>Réfutation.</strong> Aucune interaction pour ces alertes, ou une interaction de même ampleur pour des alertes sans lien avec les accès. Ce second cas indiquerait que le construit mesuré reflète une maturité générale plutôt que le Zero Trust.</p></div><h3 id="fr-s4-summary">Synthèse</h3><div aria-label="Tableau" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th>Proposition</th>
+<th>Facteur</th>
+<th>Effet attendu sur l’avantage de l’IA</th>
+<th>Alertes concernées</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Proposition">P1</td>
+<td data-label="Facteur">Aucun (effet de référence)</td>
+<td data-label="Effet attendu sur l’avantage de l’IA">Avantage sur Y2 ; avantage sur Y1 non acquis</td>
+<td data-label="Alertes concernées">Toutes</td>
+</tr>
+<tr>
+<td data-label="Proposition">P2</td>
+<td data-label="Facteur">M1 Hygiène informatique</td>
+<td data-label="Effet attendu sur l’avantage de l’IA">Croît avec la maturité</td>
+<td data-label="Alertes concernées">Toutes</td>
+</tr>
+<tr>
+<td data-label="Proposition">P3</td>
+<td data-label="Facteur">M3 Fragmentation des outils</td>
+<td data-label="Effet attendu sur l’avantage de l’IA">Décroît avec la fragmentation (lecture concurrente : croît)</td>
+<td data-label="Alertes concernées">Toutes</td>
+</tr>
+<tr>
+<td data-label="Proposition">P4</td>
+<td data-label="Facteur">M2 Zero Trust</td>
+<td data-label="Effet attendu sur l’avantage de l’IA">Croît avec la cohérence</td>
+<td data-label="Alertes concernées">Identités et accès</td>
+</tr>
+</tbody>
+</table></div><p>Le cumul des trois modérateurs (interactions d’ordre supérieur) n’est pas formulé comme proposition : il est traité comme question exploratoire en section 7.</p></section><section class="sec" id="fr-s5"><h2>5. Méthodologie de validation proposée</h2><p>La validation suit un enchaînement en trois phases, du plus exploratoire au plus contraignant. Une même logique la traverse : comparer l’IA et le triage conventionnel à l’intérieur de contextes qui diffèrent par leur hygiène, leur Zero Trust et leur fragmentation.</p><h3 id="fr-s5-1">5.1 Phase 0. Revue ciblée reproductible</h3><p>Une revue systématique restreinte, rapportée selon PRISMA 2020 (Page et al., 2021), vérifiera la lacune annoncée en section 1.1. Elle interrogera les croisements entre SOC, triage des alertes, IA, hygiène informatique, Zero Trust et intégration des outils, et documentera les bases, les équations de recherche, les critères d’inclusion et la sélection. Son résultat conditionne la formulation finale de la contribution.</p><h3 id="fr-s5-2">5.2 Phase 1. Étude qualitative exploratoire</h3><p>Des entretiens semi-directifs seront conduits auprès d’analystes SOC, de responsables de détection, de RSSI et de spécialistes de l’intégration des outils. Une cible de l’ordre de 12 à 20 entretiens dans 4 à 6 SOC différents (internes, prestataires, secteur public et privé) est proposée, jusqu’à saturation thématique. Les entretiens vérifieront que les modérateurs correspondent à des mécanismes réels, que les définitions de travail sont opérationnelles, et recueilleront des exemples de cas où l’IA a aidé ou gêné le triage.</p><h3 id="fr-s5-3">5.3 Phase 2. Analyse multiniveau et rejeu contrôlé</h3><p><strong>Analyse multiniveau.</strong> Les alertes (niveau 1) sont imbriquées dans des SOC ou des périmètres clients (niveau 2). Les modérateurs M1, M2 et M3 sont mesurés au niveau 2 ; l’usage de l’IA varie à l’intérieur d’un même SOC lorsque c’est possible (avant et après déploiement, files de traitement avec et sans IA). On estime des modèles mixtes avec des termes d’interaction entre le niveau 1 et le niveau 2 (Raudenbush et Bryk, 2002 ; Hayes, 2018). La puissance des interactions de niveau 2 dépend du nombre de SOC ou de périmètres, non du nombre d’alertes. Si cet effectif est insuffisant pour estimer trois interactions, l’étude retiendra deux modérateurs, et les prestataires de services gérés, qui supervisent plusieurs clients aux niveaux de maturité différents, constituent une source de variation naturelle à explorer.</p><p><strong>Rejeu contrôlé.</strong> Un jeu d’alertes étiqueté par des experts sert de vérité terrain. Des analystes le traitent avec ou sans assistance par IA, et l’on fait varier la qualité du contexte fourni (inventaire complet ou dégradé, identifiants communs ou non, données d’identité intégrées ou non). Cette manipulation permet d’approcher un effet causal des modérateurs sur l’avantage de l’IA, que les données de production ne permettent pas d’établir seules. Des scénarios injectés (par exemple issus d’exercices de simulation d’attaques) complètent le dispositif pour estimer le rappel, qui n’est pas observable en production.</p><h3 id="fr-s5-4">5.4 Opérationnalisation</h3><div aria-label="Tableau" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th>Construit</th>
+<th>Indicateurs envisagés</th>
+<th>Source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Construit">Triage assisté par IA</td>
+<td data-label="Indicateurs envisagés">Fonctions assistées, niveau d’automatisation, supervision humaine, part des recommandations corrigées</td>
+<td data-label="Source">Entretiens, journaux d’outil</td>
+</tr>
+<tr>
+<td data-label="Construit">M1 Hygiène</td>
+<td data-label="Indicateurs envisagés">Score composite inspiré des mesures de l’ANSSI (2017) : couverture de l’inventaire, conformité des correctifs, revue des comptes et privilèges</td>
+<td data-label="Source">Audit, données de gestion des actifs</td>
+</tr>
+<tr>
+<td data-label="Construit">M2 Zero Trust</td>
+<td data-label="Indicateurs envisagés">Échelle inspirée des piliers identité et terminaux du modèle de la CISA (2023) et des principes de Rose et al. (2020) : cohérence des politiques, intégration des données</td>
+<td data-label="Source">Audit, documentation d’architecture</td>
+</tr>
+<tr>
+<td data-label="Construit">M3 Fragmentation</td>
+<td data-label="Indicateurs envisagés">Nombre d’interfaces consultées par alerte, part des actifs résolus sous un identifiant commun, délai d’obtention du contexte</td>
+<td data-label="Source">Observation, journaux</td>
+</tr>
+<tr>
+<td data-label="Construit">Y1 Qualité de détection</td>
+<td data-label="Indicateurs envisagés">Précision, rappel, taux de faux négatifs</td>
+<td data-label="Source">Jeu étiqueté, scénarios injectés</td>
+</tr>
+<tr>
+<td data-label="Construit">Y2 Coût d’investigation</td>
+<td data-label="Indicateurs envisagés">Temps médian de qualification, nombre de consultations croisées, effort manuel</td>
+<td data-label="Source">Journaux, chronométrage</td>
+</tr>
+<tr>
+<td data-label="Construit">Contrôles</td>
+<td data-label="Indicateurs envisagés">Volume d’alertes, complexité des règles, taille et expérience de l’équipe, périmètre, type d’IA</td>
+<td data-label="Source">Données d’exploitation</td>
+</tr>
+</tbody>
+</table></div><p>Les indicateurs seront fixés avant la collecte. Une baisse du nombre d’alertes ou du temps de traitement ne sera interprétée comme un gain que si le rappel n’est pas dégradé.</p><h3 id="fr-s5-5">5.5 Stratégie d’analyse</h3><p>Une analyse descriptive caractérisera volumes, répartitions et différences entre contextes. Les modèles mixtes testeront l’interaction entre l’usage de l’IA et chaque modérateur, avec effets aléatoires par SOC et variables de contrôle ; P4 sera estimée sur les seules alertes d’identité et d’accès, puis comparée aux autres alertes comme test de spécificité. Des analyses de sensibilité feront varier la définition des indicateurs, et les comparaisons multiples seront corrigées. Le déploiement de l’IA n’étant pas aléatoire et les SOC les plus matures pouvant l’adopter les premiers, la maturité est modélisée explicitement et les comparaisons intra-SOC sont privilégiées. Aucun résultat ne peut être anticipé avant la collecte.</p><h3 id="fr-s5-6">5.6 Éthique et confidentialité</h3><p>Les données d’alertes sont sensibles et peuvent contenir des données à caractère personnel. L’étude exigera des accords de confidentialité avec les organisations, l’anonymisation ou la pseudonymisation des journaux, et des données agrégées pour les temps de traitement afin de ne pas évaluer individuellement les analystes. Les entretiens feront l’objet d’un consentement éclairé.</p></section><section class="sec" id="fr-s6"><h2>6. Discussion</h2><h3 id="fr-s6-1">6.1 Apports théoriques</h3><p>Le cadre déplace la question de recherche du volume vers la valeur conditionnelle de l’IA. Au lieu de demander si l’IA réduit la fatigue des alertes, il demande dans quel contexte elle améliore la détection et réduit le coût d’investigation. Cette reformulation a trois conséquences.</p><ol>
+<li><strong>L’IA est traitée comme une capacité de traitement insérée dans un environnement, non comme une solution isolée.</strong> Son effet est conditionnel, et c’est cette conditionnalité qui est testée.</li>
+<li><strong>Un gain de productivité n’est pas un gain de sécurité.</strong> En mesurant ensemble Y1 et Y2, le cadre empêche de conclure à la performance d’une IA qui réduirait le temps de traitement en laissant passer plus de menaces.</li>
+<li><strong>Une lecture concurrente est formulée dès le départ.</strong> Pour la fragmentation, P3 et sa proposition concurrente prédisent des signes opposés, ce qui rend le cadre falsifiable sur un point où l’intuition des praticiens diverge.</li>
+</ol><h3 id="fr-s6-2">6.2 Implications pour la gouvernance cyber</h3><p>Les responsables de la sécurité et de SOC peuvent tirer du cadre une grille de diagnostic avant d’investir dans une couche d’IA. Les difficultés observées proviennent-elles de règles mal calibrées, d’un inventaire incomplet, de comptes mal maîtrisés, d’outils non interopérables ou d’un manque de procédures ? Si la réponse relève de l’environnement, l’IA risque de produire un gain de vitesse sans gain de détection, et de rendre plus difficile le repérage des défauts qu’elle automatise.</p><p>Le cadre suggère aussi de compléter les indicateurs de volume par des mesures de pertinence, de contexte, de coût de qualification et de performance décisionnelle, et de réserver à la supervision humaine les cas ambigus. Il ne s’oppose pas à l’innovation : il cherche à déterminer les conditions dans lesquelles elle produit une amélioration mesurable.</p><h3 id="fr-s6-3">6.3 Séquencement des investissements</h3><p>Si P2 et P4 se vérifient, l’hygiène informatique et la cohérence du Zero Trust ne sont pas seulement des objectifs de sécurité autonomes : elles augmentent le rendement des investissements en IA de détection. Si P3 est soutenue, l’intégration des outils précède l’IA. Si c’est la proposition concurrente qui l’emporte, l’IA peut au contraire être un palliatif à court terme de la fragmentation. Dans les deux cas, la décision d’investissement gagne à s’appuyer sur un diagnostic du contexte et non sur la seule promesse de l’outil.</p></section><section class="sec" id="fr-s7"><h2>7. Limites et perspectives</h2><h3 id="fr-s7-1">7.1 Limites</h3><ul>
+<li><strong>Statut du manuscrit.</strong> L’article est conceptuel. Il ne repose sur aucune donnée originale et ses propositions ne sont pas établies. La revue de la littérature est préliminaire et doit être remplacée par la revue reproductible de la phase 0.</li>
+<li><strong>Validité de construit.</strong> Hygiène, cohérence du Zero Trust et fragmentation sont des construits composites dont la mesure dépend du contexte. Les échelles proposées s’inspirent de référentiels (ANSSI, 2017 ; CISA, 2023) qui n’ont pas été conçus pour mesurer des modérateurs de l’efficacité de l’IA et devront être validées.</li>
+<li><strong>Portée du Zero Trust.</strong> Le modérateur M2 ne s’applique qu’aux alertes d’identité et d’accès. Il ne dit rien du triage des autres familles d’alertes.</li>
+<li><strong>Vérité terrain.</strong> La précision et le rappel exigent une référence fiable sur les événements pertinents. En production, le rappel n’est pas observable et repose sur des scénarios injectés, dont la représentativité est limitée.</li>
+<li><strong>Sélection et causalité.</strong> Le déploiement de l’IA n’est pas aléatoire. Les comparaisons intra-SOC et le rejeu contrôlé limitent le biais sans l’éliminer.</li>
+<li><strong>Hétérogénéité de l’IA.</strong> Les classifieurs d’apprentissage automatique, les moteurs de corrélation et les assistants fondés sur des modèles de langage n’ont ni les mêmes forces ni les mêmes défauts, et évoluent vite. Le type d’IA est un contrôle, mais ses résultats pourraient ne pas se transposer d’une génération d’outils à l’autre.</li>
+<li><strong>Généralisation.</strong> Les SOC internes, les prestataires et les structures publiques diffèrent par leurs ressources et leurs objectifs. Les comparaisons doivent en tenir compte.</li>
+</ul><h3 id="fr-s7-2">7.2 Perspectives</h3><ul>
+<li><strong>Interactions d’ordre supérieur.</strong> Les effets des trois modérateurs se cumulent-ils, se compensent-ils, ou l’un d’eux suffit-il ? La question est exploratoire et demande un échantillon plus large que celui d’une première étude.</li>
+<li><strong>Dimension temporelle.</strong> La maturité évolue. Une étude longitudinale pourrait suivre l’avantage de l’IA lorsque l’hygiène, le Zero Trust ou l’intégration des outils s’améliorent.</li>
+<li><strong>Facteurs humains.</strong> L’effet de la supervision humaine, de la confiance excessive et de la complaisance sur Y1 pourrait être modélisé comme un médiateur ou un modérateur supplémentaire.</li>
+<li><strong>Adaptation des adversaires.</strong> Une IA de triage peut devenir une cible. L’extension du cadre à la robustesse face à des attaques visant la détection mérite un travail propre.</li>
+</ul></section><section class="sec" id="fr-s8"><h2>8. Conclusion</h2><p>Cet article propose de déplacer l’analyse de la fatigue des alertes du volume vers la valeur conditionnelle de l’intelligence artificielle. Il formule une question précise : si et comment l’hygiène informatique, la cohérence du Zero Trust et la fragmentation des outils modifient l’effet de l’IA sur le triage, en matière de qualité de détection et de coût d’investigation.</p><p>La proposition centrale est que la valeur opérationnelle de l’IA dans un SOC dépend non seulement de ses capacités propres, mais aussi de la qualité de configuration, d’intégration et de contextualisation de l’environnement dans lequel elle intervient. Quatre propositions falsifiables, dont une opposant deux lectures de l’effet de la fragmentation, et un protocole en trois phases permettent de la mettre à l’épreuve.</p><p>Si elle se vérifie, la question à poser avant d’ajouter une couche d’IA n’est plus seulement ce que l’outil sait faire, mais ce que l’environnement lui permet de faire. Si elle est réfutée, le cadre aura au moins précisé les conditions dans lesquelles l’IA apporte un gain mesurable indépendamment du contexte, ce qui constituerait aussi un résultat utile.</p></section><section class="sec" id="fr-refs"><h2>Bibliographie</h2><ul class="refs">
+<li>Agence nationale de la sécurité des systèmes d’information (ANSSI). (2017). <em>Guide d’hygiène informatique : renforcer la sécurité de son système d’information en 42 mesures</em> (version 2.0). ANSSI.</li>
+<li>Alahmadi, B. A., Axon, L., &amp; Martinovic, I. (2022). 99% false positives: A qualitative study of SOC analysts’ perspectives on security alarms. <em>Proceedings of the 31st USENIX Security Symposium</em>. USENIX Association.</li>
+<li>Chhetri, M. B., Tariq, S., Singh, R., Jalalvand, F., Paris, C., &amp; Nepal, S. (2024). Towards human-AI teaming to mitigate alert fatigue in Security Operations Centres. <em>ACM Transactions on Internet Technology, 24</em>(3), Article 12, 1–22. <a href="https://doi.org/10.1145/3670009" rel="noopener" target="_blank">https://doi.org/10.1145/3670009</a></li>
+<li>Cybersecurity and Infrastructure Security Agency (CISA). (2023). <em>Zero Trust Maturity Model, Version 2.0</em>. CISA.</li>
+<li>Hayes, A. F. (2018). <em>Introduction to mediation, moderation, and conditional process analysis: A regression-based approach</em> (2nd ed.). Guilford Press.</li>
+<li>Kokulu, F. B., Soneji, A., Bao, T., Shoshitaishvili, Y., Zhao, Z., Doupé, A., &amp; Ahn, G.-J. (2019). Matched and mismatched SOCs: A qualitative study on Security Operations Center issues. <em>Proceedings of the 2019 ACM SIGSAC Conference on Computer and Communications Security</em>. ACM.</li>
+<li>Ofte, H. J., &amp; Katsikas, S. (2023). Understanding situation awareness in SOCs: A systematic literature review. <em>Computers &amp; Security, 126</em>, 103069. <a href="https://doi.org/10.1016/j.cose.2022.103069" rel="noopener" target="_blank">https://doi.org/10.1016/j.cose.2022.103069</a></li>
+<li>Page, M. J., McKenzie, J. E., Bossuyt, P. M., Boutron, I., Hoffmann, T. C., Mulrow, C. D., et al. (2021). The PRISMA 2020 statement: An updated guideline for reporting systematic reviews. <em>BMJ, 372</em>, n71. <a href="https://doi.org/10.1136/bmj.n71" rel="noopener" target="_blank">https://doi.org/10.1136/bmj.n71</a></li>
+<li>Parasuraman, R., &amp; Manzey, D. H. (2010). Complacency and bias in human use of automation: An attentional integration. <em>Human Factors, 52</em>(3), 381–410.</li>
+<li>Parasuraman, R., &amp; Riley, V. (1997). Humans and automation: Use, misuse, disuse, abuse. <em>Human Factors, 39</em>(2), 230–253.</li>
+<li>Raudenbush, S. W., &amp; Bryk, A. S. (2002). <em>Hierarchical linear models: Applications and data analysis methods</em> (2nd ed.). Sage.</li>
+<li>Rose, S., Borchert, O., Mitchell, S., &amp; Connelly, S. (2020). <em>Zero Trust Architecture</em> (NIST Special Publication 800-207). National Institute of Standards and Technology. <a href="https://doi.org/10.6028/NIST.SP.800-207" rel="noopener" target="_blank">https://doi.org/10.6028/NIST.SP.800-207</a></li>
+<li>Tariq, S., Baruwal Chhetri, M., Nepal, S., &amp; Paris, C. (2025). Alert fatigue in Security Operations Centres: Research challenges and opportunities. <em>ACM Computing Surveys, 57</em>(9), Article 224, 1–38. <a href="https://doi.org/10.1145/3723158" rel="noopener" target="_blank">https://doi.org/10.1145/3723158</a></li>
+<li>Vielberth, M., Böhm, F., Fichtinger, I., &amp; Pernul, G. (2020). Security Operations Center: A systematic study and open challenges. <em>IEEE Access, 8</em>, 227756–227779.</li>
+</ul></section>
+<footer class="signature">
+<p class="sig-script" aria-label="Innocent Twagirumukiza">Innocent Twagirumukiza</p>
+<p class="sig-role">Consultant GRC et cybersécurité, formateur</p>
+<a class="sig-link" href="https://twagirumukiza.github.io/" target="_blank" rel="noopener">Visiter mon site · twagirumukiza.github.io</a>
+<p class="legal">© 2026 Innocent Twagirumukiza. Version préliminaire, octobre 2026.</p>
 </footer>
-</main>
-<script>window.C={}</script>
-<script src="content/fr.js"></script>
-<script src="content/en.js" onerror="void 0"></script>
-<script src="content/zh.js" onerror="void 0"></script>
+</article>
+</div></div>
+</div>
+<div class="lang-block" data-lang="en" lang="en" hidden>
+<header class="hero wrap"><div class="frame">
+<ul class="chips"><li>Conceptual article</li><li>Preliminary version</li><li>No empirical data</li></ul>
+<h1 class="title">Artificial intelligence in SOC alert triage: the moderating role of cyber hygiene, Zero Trust and tool fragmentation</h1>
+<p class="byline">Innocent Twagirumukiza · October 2026</p>
+<div class="dl-row"><span class="dl-label">Download the article as PDF</span><a class="dl" href="pdf/IA_triage_alertes_SOC_FR.pdf" data-file="IA_triage_alertes_SOC_FR.pdf" download><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11m0 0l-4.5-4.5M12 15l4.5-4.5M5 20h14"/></svg><span lang="fr">Français</span><small>PDF · 419 KB</small></a><a class="dl is-current" href="pdf/AI_SOC_alert_triage_EN.pdf" data-file="AI_SOC_alert_triage_EN.pdf" download><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11m0 0l-4.5-4.5M12 15l4.5-4.5M5 20h14"/></svg><span lang="en">English</span><small>PDF · 393 KB</small></a><a class="dl" href="pdf/AI_SOC_alert_triage_ZH.pdf" data-file="AI_SOC_alert_triage_ZH.pdf" download><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11m0 0l-4.5-4.5M12 15l4.5-4.5M5 20h14"/></svg><span lang="zh-Hans">中文</span><small>PDF · 786 KB</small></a></div>
+<figure class="strip"><svg viewBox="0 0 1200 120" preserveAspectRatio="none" aria-hidden="true" focusable="false"><line style="--i:0" x1="5" y1="41.7" x2="5" y2="78.3"/><line style="--i:1" x1="15" y1="53.5" x2="15" y2="66.5"/><line style="--i:2" x1="25" y1="47.7" x2="25" y2="72.3"/><line style="--i:3" x1="35" y1="46.0" x2="35" y2="74.0"/><line style="--i:4" x1="45" y1="53.5" x2="45" y2="66.5"/><line style="--i:5" x1="55" y1="48.2" x2="55" y2="71.8"/><line style="--i:6" x1="65" y1="45.5" x2="65" y2="74.5"/><line style="--i:7" x1="75" y1="51.4" x2="75" y2="68.6"/><line style="--i:8" x1="85" y1="54.5" x2="85" y2="65.5"/><line class="s" style="--i:9" x1="95" y1="16.0" x2="95" y2="104.0"/><line style="--i:10" x1="105" y1="41.2" x2="105" y2="78.8"/><line style="--i:11" x1="115" y1="53.3" x2="115" y2="66.7"/><line style="--i:12" x1="125" y1="51.8" x2="125" y2="68.2"/><line style="--i:13" x1="135" y1="49.4" x2="135" y2="70.6"/><line style="--i:14" x1="145" y1="44.3" x2="145" y2="75.7"/><line style="--i:15" x1="155" y1="46.7" x2="155" y2="73.3"/><line style="--i:16" x1="165" y1="45.1" x2="165" y2="74.9"/><line style="--i:17" x1="175" y1="44.1" x2="175" y2="75.9"/><line style="--i:18" x1="185" y1="44.5" x2="185" y2="75.5"/><line style="--i:19" x1="195" y1="53.3" x2="195" y2="66.7"/><line style="--i:20" x1="205" y1="52.5" x2="205" y2="67.5"/><line style="--i:21" x1="215" y1="43.1" x2="215" y2="76.9"/><line style="--i:22" x1="225" y1="43.3" x2="225" y2="76.7"/><line style="--i:23" x1="235" y1="46.0" x2="235" y2="74.0"/><line style="--i:24" x1="245" y1="46.8" x2="245" y2="73.2"/><line style="--i:25" x1="255" y1="43.4" x2="255" y2="76.6"/><line style="--i:26" x1="265" y1="39.7" x2="265" y2="80.3"/><line class="s" style="--i:27" x1="275" y1="16.0" x2="275" y2="104.0"/><line style="--i:28" x1="285" y1="40.2" x2="285" y2="79.8"/><line style="--i:29" x1="295" y1="54.0" x2="295" y2="66.0"/><line style="--i:30" x1="305" y1="48.4" x2="305" y2="71.6"/><line style="--i:31" x1="315" y1="47.7" x2="315" y2="72.3"/><line style="--i:32" x1="325" y1="39.2" x2="325" y2="80.8"/><line style="--i:33" x1="335" y1="43.6" x2="335" y2="76.4"/><line style="--i:34" x1="345" y1="43.3" x2="345" y2="76.7"/><line style="--i:35" x1="355" y1="42.9" x2="355" y2="77.1"/><line style="--i:36" x1="365" y1="54.8" x2="365" y2="65.2"/><line style="--i:37" x1="375" y1="49.4" x2="375" y2="70.6"/><line style="--i:38" x1="385" y1="44.3" x2="385" y2="75.7"/><line style="--i:39" x1="395" y1="40.5" x2="395" y2="79.5"/><line style="--i:40" x1="405" y1="39.9" x2="405" y2="80.1"/><line style="--i:41" x1="415" y1="51.9" x2="415" y2="68.1"/><line style="--i:42" x1="425" y1="52.6" x2="425" y2="67.4"/><line style="--i:43" x1="435" y1="40.0" x2="435" y2="80.0"/><line class="s" style="--i:44" x1="445" y1="16.0" x2="445" y2="104.0"/><line style="--i:45" x1="455" y1="52.6" x2="455" y2="67.4"/><line style="--i:46" x1="465" y1="46.5" x2="465" y2="73.5"/><line style="--i:47" x1="475" y1="48.7" x2="475" y2="71.3"/><line style="--i:48" x1="485" y1="51.6" x2="485" y2="68.4"/><line style="--i:49" x1="495" y1="51.1" x2="495" y2="68.9"/><line style="--i:50" x1="505" y1="47.0" x2="505" y2="73.0"/><line style="--i:51" x1="515" y1="42.1" x2="515" y2="77.9"/><line style="--i:52" x1="525" y1="48.2" x2="525" y2="71.8"/><line style="--i:53" x1="535" y1="52.5" x2="535" y2="67.5"/><line style="--i:54" x1="545" y1="51.4" x2="545" y2="68.6"/><line style="--i:55" x1="555" y1="44.6" x2="555" y2="75.4"/><line style="--i:56" x1="565" y1="54.0" x2="565" y2="66.0"/><line style="--i:57" x1="575" y1="41.6" x2="575" y2="78.4"/><line class="s" style="--i:58" x1="585" y1="16.0" x2="585" y2="104.0"/><line style="--i:59" x1="595" y1="51.1" x2="595" y2="68.9"/><line style="--i:60" x1="605" y1="44.3" x2="605" y2="75.7"/><line style="--i:61" x1="615" y1="45.0" x2="615" y2="75.0"/><line style="--i:62" x1="625" y1="51.3" x2="625" y2="68.7"/><line style="--i:63" x1="635" y1="47.7" x2="635" y2="72.3"/><line style="--i:64" x1="645" y1="51.1" x2="645" y2="68.9"/><line style="--i:65" x1="655" y1="46.5" x2="655" y2="73.5"/><line style="--i:66" x1="665" y1="42.4" x2="665" y2="77.6"/><line style="--i:67" x1="675" y1="44.0" x2="675" y2="76.0"/><line style="--i:68" x1="685" y1="51.9" x2="685" y2="68.1"/><line style="--i:69" x1="695" y1="52.8" x2="695" y2="67.2"/><line style="--i:70" x1="705" y1="50.6" x2="705" y2="69.4"/><line style="--i:71" x1="715" y1="53.5" x2="715" y2="66.5"/><line style="--i:72" x1="725" y1="52.5" x2="725" y2="67.5"/><line style="--i:73" x1="735" y1="53.6" x2="735" y2="66.4"/><line style="--i:74" x1="745" y1="52.3" x2="745" y2="67.7"/><line style="--i:75" x1="755" y1="51.9" x2="755" y2="68.1"/><line style="--i:76" x1="765" y1="41.6" x2="765" y2="78.4"/><line style="--i:77" x1="775" y1="38.2" x2="775" y2="81.8"/><line style="--i:78" x1="785" y1="40.4" x2="785" y2="79.6"/><line style="--i:79" x1="795" y1="44.6" x2="795" y2="75.4"/><line style="--i:80" x1="805" y1="44.5" x2="805" y2="75.5"/><line class="s" style="--i:81" x1="815" y1="16.0" x2="815" y2="104.0"/><line style="--i:82" x1="825" y1="51.4" x2="825" y2="68.6"/><line style="--i:83" x1="835" y1="48.5" x2="835" y2="71.5"/><line style="--i:84" x1="845" y1="39.4" x2="845" y2="80.6"/><line style="--i:85" x1="855" y1="44.8" x2="855" y2="75.2"/><line style="--i:86" x1="865" y1="53.6" x2="865" y2="66.4"/><line style="--i:87" x1="875" y1="46.7" x2="875" y2="73.3"/><line style="--i:88" x1="885" y1="44.1" x2="885" y2="75.9"/><line style="--i:89" x1="895" y1="49.2" x2="895" y2="70.8"/><line style="--i:90" x1="905" y1="51.6" x2="905" y2="68.4"/><line style="--i:91" x1="915" y1="52.1" x2="915" y2="67.9"/><line style="--i:92" x1="925" y1="43.4" x2="925" y2="76.6"/><line style="--i:93" x1="935" y1="40.0" x2="935" y2="80.0"/><line style="--i:94" x1="945" y1="44.6" x2="945" y2="75.4"/><line style="--i:95" x1="955" y1="40.2" x2="955" y2="79.8"/><line style="--i:96" x1="965" y1="51.9" x2="965" y2="68.1"/><line style="--i:97" x1="975" y1="46.0" x2="975" y2="74.0"/><line style="--i:98" x1="985" y1="38.2" x2="985" y2="81.8"/><line style="--i:99" x1="995" y1="46.3" x2="995" y2="73.7"/><line style="--i:100" x1="1005" y1="38.3" x2="1005" y2="81.7"/><line style="--i:101" x1="1015" y1="49.2" x2="1015" y2="70.8"/><line style="--i:102" x1="1025" y1="43.8" x2="1025" y2="76.2"/><line class="s" style="--i:103" x1="1035" y1="16.0" x2="1035" y2="104.0"/><line style="--i:104" x1="1045" y1="43.1" x2="1045" y2="76.9"/><line style="--i:105" x1="1055" y1="48.4" x2="1055" y2="71.6"/><line style="--i:106" x1="1065" y1="44.6" x2="1065" y2="75.4"/><line style="--i:107" x1="1075" y1="53.6" x2="1075" y2="66.4"/><line style="--i:108" x1="1085" y1="48.9" x2="1085" y2="71.1"/><line style="--i:109" x1="1095" y1="52.3" x2="1095" y2="67.7"/><line style="--i:110" x1="1105" y1="40.5" x2="1105" y2="79.5"/><line style="--i:111" x1="1115" y1="40.5" x2="1115" y2="79.5"/><line style="--i:112" x1="1125" y1="41.9" x2="1125" y2="78.1"/><line style="--i:113" x1="1135" y1="54.8" x2="1135" y2="65.2"/><line style="--i:114" x1="1145" y1="42.4" x2="1145" y2="77.6"/><line style="--i:115" x1="1155" y1="43.4" x2="1155" y2="76.6"/><line style="--i:116" x1="1165" y1="38.7" x2="1165" y2="81.3"/><line style="--i:117" x1="1175" y1="49.4" x2="1175" y2="70.6"/><line style="--i:118" x1="1185" y1="42.1" x2="1185" y2="77.9"/><line style="--i:119" x1="1195" y1="40.5" x2="1195" y2="79.5"/></svg><figcaption>Each line is an alert; only a few are signal.</figcaption></figure>
+</div></header>
+<div class="wrap"><div class="frame layout">
+<nav class="toc" aria-label="Contents"><p class="toc-title">Contents</p><ol><li><a href="#en-abstract">Abstract</a></li><li><a href="#en-s1">1. Introduction</a></li><li><a href="#en-s2">2. Literature review</a></li><li><a href="#en-s3">3. Conceptual framework</a></li><li><a href="#en-s4">4. Research propositions</a></li><li><a href="#en-s5">5. Proposed validation methodology</a></li><li><a href="#en-s6">6. Discussion</a></li><li><a href="#en-s7">7. Limitations and future directions</a></li><li><a href="#en-s8">8. Conclusion</a></li><li><a href="#en-refs">References</a></li></ol></nav>
+<article id="main-en" tabindex="-1">
+<section class="sec sec-abstract" id="en-abstract"><h2>Abstract</h2><p>The effect of artificial intelligence (AI) on alert triage in a Security Operations Center (SOC) depends on the quality of the environment in which it is deployed. This article proposes a conceptual framework for examining this thesis. Its research question is as follows: whether and how the maturity of cyber hygiene, the consistency of Zero Trust implementation and the degree of tool fragmentation modify the effect of AI, relative to conventional triage, on detection quality and on investigation cost.</p><p>The framework distinguishes information volume from information noise. It treats the use of AI as the focal variable, the three factors as moderators, and alert volume and rule configuration complexity as control variables. Four research propositions are formulated, each accompanied by its expected direction and its refutation criterion. A three-phase validation protocol is proposed: a reproducible targeted review, an exploratory qualitative study, and then a multilevel analysis complemented by a replay of labelled alerts.</p><p>The article reports no empirical results. It aims to provide a testable basis for determining under what conditions AI genuinely reduces information noise rather than automating existing deficiencies.</p><p class="keywords"><strong>Keywords:</strong> SOC; alert triage; information noise; artificial intelligence; cyber hygiene; Zero Trust; tool fragmentation; moderation effect; human decision-making.</p></section><section class="sec" id="en-s1"><h2>1. Introduction</h2><p>SOCs concentrate the monitoring, detection, analysis and response functions for security incidents. They rely on solutions for security event management, endpoint detection, threat intelligence and response orchestration. The multiplication of cloud environments, the generalisation of digital identities and the growth of telemetry sources increase the volume of data to be processed, and organisations stack specialised tools to cover ever wider perimeters.</p><p>The literature describes the human consequences of this situation. Tariq et al. (2025) survey research on alert fatigue in SOCs. Alahmadi et al. (2022) and Kokulu et al. (2019) report, on the basis of interviews with analysts, the difficulties related to the relevance of alarms and to the fit between tools, processes and people. Vielberth et al. (2020) offer a systematic study of SOCs and their open challenges. Ofte and Katsikas (2023) examine operators’ situational awareness.</p><p>Faced with these difficulties, AI is increasingly presented as a lever for prioritising, correlating and summarising alerts. Chhetri et al. (2024) study the cooperation between analysts and AI in this respect. However, AI is inserted into an environment that is already structured, with its detection rules, its tools and its security practices, and nothing allows us to assume that its contribution is identical from one SOC to another.</p><h3 id="en-s1-1">1.1 The gap addressed</h3><p>The works cited most often examine alert load, human-AI cooperation or situational awareness. The relationship between the effect of AI and the quality of the technical and organisational environment is less formalised. The working hypothesis of this article is that this gap exists and that it is significant; the targeted review described in Section 5 must confirm or refute this before any submission.</p><p>A triage AI consumes context: asset identifiers, owners, account history, patch status, endpoint posture, logs from several tools. If this context is incomplete, inconsistent or scattered, the AI may go faster without deciding better. Conversely, a well-controlled environment may allow the AI to produce a real gain. Context is therefore not a mere confounding variable: it may condition the very effect one seeks to measure.</p><h3 id="en-s1-2">1.2 Research question</h3><blockquote>
+<p>How do the maturity of cyber hygiene, the consistency of Zero Trust implementation and the degree of tool fragmentation modify the effect of artificial intelligence, relative to conventional triage, on detection quality and on investigation cost during alert triage in SOCs?</p>
+</blockquote><p>Three sub-questions break it down:</p><ol>
+<li><strong>SQ1 (hygiene).</strong> Is the advantage of AI over conventional triage more pronounced when cyber hygiene is more mature?</li>
+<li><strong>SQ2 (fragmentation).</strong> Does this advantage diminish when tools are fragmented and poorly interoperable, or does AI on the contrary compensate for this fragmentation?</li>
+<li><strong>SQ3 (Zero Trust).</strong> For alerts related to identities and access, does a consistent Zero Trust implementation increase the advantage of AI?</li>
+</ol><p>Both outcomes are examined together: a time saving obtained at the price of missed threats does not constitute an improvement.</p><h3 id="en-s1-3">1.3 Contributions and outline</h3><p>The article provides three elements: a functional definition of information noise distinct from volume and from alert fatigue; a moderation framework in which AI is the focal variable and three characteristics of the environment are moderators; and four falsifiable propositions with a validation protocol. Section 2 reviews the literature, Section 3 presents the framework, Section 4 formulates the propositions, Section 5 describes the validation method, and Sections 6 to 8 cover the discussion, the limitations and the conclusion.</p></section><section class="sec" id="en-s2"><h2>2. Literature review</h2><p>This review is deliberately focused on what underpins the model. It remains preliminary: Section 5 provides for a reproducible review before submission.</p><h3 id="en-s2-1">2.1 Alert volume and fatigue</h3><p>Alert fatigue refers to the degradation of attention or vigilance that may appear when analysts handle numerous alerts whose relevance is low or difficult to establish (Tariq et al., 2025). The number of alerts measures load, not the difficulty of the work: two SOCs receiving the same number of alerts may face very different efforts depending on the available context, redundancy and investigation procedures. It is therefore necessary to distinguish the volume of events collected, the volume of alerts generated, the proportion of relevant alerts, the difficulty of qualification and the quality of final decisions.</p><h3 id="en-s2-2">2.2 AI in triage and human-AI cooperation</h3><p>AI can prioritise alerts, link events, summarise context and automate repetitive tasks. Chhetri et al. (2024) argue for the value of a cooperation in which automation handles suitable tasks and human expertise remains engaged for ambiguous cases. Work on automation shows, however, that overreliance and complacency are known risks (Parasuraman and Riley, 1997; Parasuraman and Manzey, 2010). An AI that processes more alerts in less time therefore improves security only if the risk of missing a relevant threat does not increase. This caveat justifies measuring investigation cost and detection quality together.</p><h3 id="en-s2-3">2.3 Tool fragmentation and loss of context</h3><p>SOCs combine several specialised technologies. This diversity improves coverage but may degrade integration: different identifiers for the same asset, redundant alerts, context to be reconstructed manually across several interfaces. Kokulu et al. (2019) document mismatches between technologies, processes and people in SOCs. The relevant variable is not the number of products, but interoperability, the semantic consistency of data and the sharing of context between components. An environment composed of many well-integrated tools is not fragmented in the sense of this model.</p><h3 id="en-s2-4">2.4 Cyber hygiene</h3><p>Cyber hygiene encompasses the basic practices that keep an environment under control: asset inventory, patch management, administration of accounts and privileges, secure configuration. ANSSI (2017) offers a reference set of measures. For a SOC, these practices determine how easily an alert can be linked to an asset and to an owner, and the stability of baseline behaviours. An improvement in hygiene may nevertheless reveal previously invisible events and temporarily increase detections; the expected effect therefore concerns the interpretability of alerts, not their number.</p><h3 id="en-s2-5">2.5 Zero Trust</h3><p>Zero Trust rests on explicit verification of access, least privilege and the evaluation of context and risk at each request (Rose et al., 2020). The CISA maturity model (2023) structures its implementation into pillars, including identity and devices. The associated controls produce information on identities, devices and access conditions which, when correlated with other sources, can help qualify an access alert. But poorly harmonised policies may also multiply denials and context changes. Zero Trust is therefore neither an intrinsic source of noise nor a guarantee of noise reduction. Its role in this model is restricted to alerts related to identities and access, where it provides context.</p><h3 id="en-s2-6">2.6 Summary and current support</h3><p>The following table indicates, for each element of the model, the assumed role and the degree of documentary support currently available to this article. It highlights the parts to be consolidated by the targeted review.</p><div aria-label="Table" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th>Element</th>
+<th>Assumed role in the model</th>
+<th>Current documentary support</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Element">Alert fatigue and volume</td>
+<td data-label="Assumed role in the model">Control variable</td>
+<td data-label="Current documentary support">Strong (Tariq et al., 2025; Alahmadi et al., 2022)</td>
+</tr>
+<tr>
+<td data-label="Element">Human-AI cooperation</td>
+<td data-label="Assumed role in the model">Framework for assisted triage</td>
+<td data-label="Current documentary support">Partial (Chhetri et al., 2024; Parasuraman and Manzey, 2010)</td>
+</tr>
+<tr>
+<td data-label="Element">Tool fragmentation</td>
+<td data-label="Assumed role in the model">Moderator</td>
+<td data-label="Current documentary support">Partial, mostly qualitative (Kokulu et al., 2019)</td>
+</tr>
+<tr>
+<td data-label="Element">Cyber hygiene</td>
+<td data-label="Assumed role in the model">Moderator</td>
+<td data-label="Current documentary support">Reference frameworks (ANSSI, 2017), little work on the link with the SOC</td>
+</tr>
+<tr>
+<td data-label="Element">Zero Trust</td>
+<td data-label="Assumed role in the model">Moderator, identity and access alerts</td>
+<td data-label="Current documentary support">Reference frameworks (Rose et al., 2020; CISA, 2023), little work on the link with the SOC</td>
+</tr>
+<tr>
+<td data-label="Element">Interaction between these factors and AI</td>
+<td data-label="Assumed role in the model">Core of the contribution</td>
+<td data-label="Current documentary support">To be established by the targeted review</td>
+</tr>
+</tbody>
+</table></div><p>The gap is therefore less the absence of literature on each of the factors than the absence, to our knowledge, of a framework that articulates them as moderators of the effect of AI on triage.</p></section><section class="sec" id="en-s3"><h2>3. Conceptual framework</h2><h3 id="en-s3-1">3.1 Definition of information noise</h3><p>Information noise refers to the share of security information which, in a given operational context, mobilises analytical resources without contributing proportionately to the identification, qualification or management of relevant threats.</p><p>This definition is functional. A non-malicious alert is not necessarily noise: it may verify the coverage of a control or reveal a misconfiguration. Noise is judged in relation to the purpose of the investigation, the value of the signal and the effort required to exploit it. It is distinct from volume, which is a quantity, and from alert fatigue, which is a possible human consequence of repeated exposure to a load that is difficult to manage.</p><h3 id="en-s3-2">3.2 Model variables</h3><p>The model poses a question of difference: does AI perform better or more cheaply than conventional triage, and does this difference vary with the environment? It retains one focal variable, three moderators, two outcomes and a set of control variables. The figure below gives the structure and the table the working definitions.</p><figure class="figure"><div class="fig-scroll"><svg viewBox="0 0 760 448" role="img" aria-label="Model diagram: three moderators (cyber hygiene, Zero Trust, tool fragmentation) act on the gap between AI-assisted triage and conventional triage, which determines detection quality and investigation cost; control variables apply to both conditions." xmlns="http://www.w3.org/2000/svg">
+<defs><marker id="arrow-en" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path class="fx-arrow" d="M0 0L10 5L0 10z"/></marker></defs>
+<g class="fx-edge">
+<path d="M132 112V164H290V246" marker-end="url(#arrow-en)"/><path d="M380 112V246" marker-end="url(#arrow-en)"/><path d="M628 112V164H460V246" marker-end="url(#arrow-en)"/>
+<path d="M224 250H500"/><path d="M500 250V320H518" marker-end="url(#arrow-en)"/><path d="M500 320V396H518" marker-end="url(#arrow-en)"/>
+<path class="fx-dash" d="M452 372H498" marker-end="url(#arrow-en)"/>
+</g>
+<circle class="fx-dot" cx="500" cy="250" r="4"/>
+<rect class="fx-box" x="24" y="56" width="216" height="56" rx="8"/>
+<text class="fx-t" x="132" y="80" text-anchor="middle">M1 · Cyber hygiene</text><text class="fx-s" x="132" y="96" text-anchor="middle">maturity of practices</text>
+<rect class="fx-box" x="272" y="56" width="216" height="56" rx="8"/>
+<text class="fx-t" x="380" y="80" text-anchor="middle">M2 · Zero Trust</text><text class="fx-s" x="380" y="96" text-anchor="middle">consistency · access alerts</text>
+<rect class="fx-box" x="520" y="56" width="216" height="56" rx="8"/>
+<text class="fx-t" x="628" y="80" text-anchor="middle">M3 · Fragmentation</text><text class="fx-s" x="628" y="96" text-anchor="middle">tool interoperability</text>
+<rect class="fx-main" x="24" y="222" width="200" height="56" rx="8"/>
+<text class="fx-t" x="124" y="246" text-anchor="middle">AI-assisted triage</text><text class="fx-s" x="124" y="262" text-anchor="middle">vs conventional triage</text>
+<text class="fx-s" x="362" y="272" text-anchor="middle">gap Δ: AI minus conventional</text>
+<rect class="fx-box" x="520" y="292" width="216" height="56" rx="8"/>
+<text class="fx-t" x="628" y="316" text-anchor="middle">Y1 · Detection quality</text><text class="fx-s" x="628" y="332" text-anchor="middle">precision, recall</text>
+<rect class="fx-box" x="520" y="368" width="216" height="56" rx="8"/>
+<text class="fx-t" x="628" y="392" text-anchor="middle">Y2 · Investigation cost</text><text class="fx-s" x="628" y="408" text-anchor="middle">time, sources, manual effort</text>
+<rect class="fx-box fx-dash" x="24" y="336" width="428" height="72" rx="8"/>
+<text class="fx-t" x="40" y="360">Control variables</text><text class="fx-s" x="40" y="376">Alert volume, rule complexity,</text><text class="fx-s" x="40" y="392">team size, perimeter, type of AI</text>
+</svg></div><figcaption>Figure 1. Moderation model: one focal variable, three moderators, two outcomes.</figcaption></figure><p>The three moderators act on the difference between AI and conventional triage, not directly on the outcomes; the control variables act on both conditions being compared.</p><div aria-label="Table" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th>Role</th>
+<th>Variable</th>
+<th>Working definition</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Role">Focal</td>
+<td data-label="Variable">AI-assisted triage</td>
+<td data-label="Working definition">Use of AI to prioritise, correlate or summarise alerts, compared with conventional triage based on rules and manual procedures. Described by its functions, its level of automation and human supervision.</td>
+</tr>
+<tr>
+<td data-label="Role">Moderator M1</td>
+<td data-label="Variable">Cyber hygiene maturity</td>
+<td data-label="Working definition">Completeness of the asset inventory, patch compliance, control of accounts and privileges, maintained configurations.</td>
+</tr>
+<tr>
+<td data-label="Role">Moderator M2</td>
+<td data-label="Variable">Consistency of Zero Trust implementation</td>
+<td data-label="Working definition">Harmonisation of access policies and integration of identity and endpoint data. Applied to alerts related to identities and access.</td>
+</tr>
+<tr>
+<td data-label="Role">Moderator M3</td>
+<td data-label="Variable">Tool fragmentation</td>
+<td data-label="Working definition">Low effective interoperability: non-shared identifiers for the same asset, scattered context, number of interfaces to consult per alert.</td>
+</tr>
+<tr>
+<td data-label="Role">Outcome Y1</td>
+<td data-label="Variable">Detection quality</td>
+<td data-label="Working definition">Precision, recall and false-negative rate on relevant alerts.</td>
+</tr>
+<tr>
+<td data-label="Role">Outcome Y2</td>
+<td data-label="Variable">Investigation cost</td>
+<td data-label="Working definition">Qualification time, number of sources consulted, manual effort per alert.</td>
+</tr>
+<tr>
+<td data-label="Role">Control</td>
+<td data-label="Variable">Volume and configuration</td>
+<td data-label="Working definition">Alert volume, rule configuration complexity, team size and experience, monitored perimeter, type of AI.</td>
+</tr>
+</tbody>
+</table></div><h3 id="en-s3-3">3.3 Reading the model</h3><p>Let Δ be the performance difference between AI-assisted triage and conventional triage, measured separately on Y1 and on Y2. A moderator is a variable that makes Δ vary: the effect of AI is not assumed to be constant, it is assumed to be conditional. The model does not say that AI is effective or ineffective in general; it says where and under what conditions its effect changes.</p><p>Three clarifications frame this reading.</p><ol>
+<li><strong>Maturity and consistency are two distinct constructs.</strong> Hygiene is measured by a maturity of practices, Zero Trust by the consistency of an architecture and its policies. They will be operationalised separately (Section 5).</li>
+<li><strong>Volume and rule complexity are controls, not objects of study.</strong> They influence alert load in both conditions being compared, but the framework does not seek to explain their own effect.</li>
+<li><strong>Rival readings exist.</strong> Hygiene may also act as a factor that modifies the number of alerts (direct effect), and the most mature SOCs may be those that adopt AI first (selection bias). The protocol in Section 5 provides for within-SOC comparisons to limit this second risk.</li>
+</ol></section><section class="sec" id="en-s4"><h2>4. Research propositions</h2><p>The following four propositions are theoretical statements to be tested, not results. Each specifies the expected effect, the mechanism and what would refute it. The “AI advantage” refers, for each outcome, to the difference favourable to AI relative to conventional triage: higher detection quality or lower investigation cost.</p><div class="prop" id="en-p1"><h3><span class="code">P1</span>Baseline effect: the gain concerns cost first</h3><p><strong>Statement.</strong> On average, AI-assisted triage reduces investigation cost (Y2) relative to conventional triage, but this reduction is not sufficient to establish an improvement in detection quality (Y1), whose difference may be zero, positive or negative.</p><p><strong>Mechanism.</strong> AI acts first on the speed of qualification through prioritisation and summarisation. Detection quality depends on the accuracy of rankings and on the risk of masking an important alert, a risk known in decision-support systems (Parasuraman and Manzey, 2010).</p><p><strong>Refutation.</strong> P1 is refuted if cost is not lower under AI, or if the advantage on Y1 is uniformly positive across all environments, which would make it pointless to distinguish the two outcomes.</p></div><div class="prop" id="en-p2"><h3><span class="code">P2</span>Cyber hygiene: the advantage grows with maturity</h3><p><strong>Statement.</strong> With alert volume controlled, the AI advantage on Y1 and on Y2 is greater the higher the maturity of cyber hygiene (M1).</p><p><strong>Mechanism.</strong> A complete inventory, controlled accounts and stable configurations allow AI to link each alert to an asset and to an owner, and to rely on stable baseline behaviours.</p><p><strong>Caveat.</strong> Better hygiene may reveal previously invisible events and temporarily increase the number of detections; hence the control for volume.</p><p><strong>Refutation.</strong> The interaction between AI use and M1 is zero or of opposite sign after controlling for volume.</p></div><div class="prop" id="en-p3"><h3><span class="code">P3</span>Tool fragmentation: the advantage decreases, or AI compensates</h3><p><strong>Statement.</strong> The AI advantage on Y1 and on Y2 is smaller the more tools are fragmented and poorly interoperable (M3).</p><p><strong>Mechanism.</strong> Inconsistent identifiers and scattered context limit the ability of AI to link data; its outputs then rest on partial context.</p><p><strong>Rival proposition.</strong> AI might on the contrary compensate for fragmentation by correlating scattered sources that the analyst would otherwise have to consult one by one. The advantage would then be more pronounced in a fragmented environment. These two readings are opposed and can be discriminated by the data; deciding between them is a possible contribution of the study.</p><p><strong>Refutation.</strong> The interaction between AI use and M3 is zero or positive. A positive interaction would support the rival reading.</p></div><div class="prop" id="en-p4"><h3><span class="code">P4</span>Zero Trust: the advantage grows with consistency, for access alerts</h3><p><strong>Statement.</strong> For alerts related to identities and access, the AI advantage on Y1 and on Y2 is greater the more consistent the Zero Trust implementation (M2), that is, the more policies are harmonised and identity and endpoint data are integrated.</p><p><strong>Mechanism.</strong> Zero Trust controls produce usable context for qualifying an access alert: endpoint posture, session risk, access decision applied.</p><p><strong>Caveat.</strong> Poorly harmonised policies may multiply denials and context changes, and reduce the contribution of Zero Trust to triage.</p><p><strong>Refutation.</strong> No interaction for these alerts, or an interaction of the same magnitude for alerts unrelated to access. This second case would indicate that the construct measured reflects general maturity rather than Zero Trust.</p></div><h3 id="en-s4-summary">Summary</h3><div aria-label="Table" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th>Proposition</th>
+<th>Factor</th>
+<th>Expected effect on the AI advantage</th>
+<th>Alerts concerned</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Proposition">P1</td>
+<td data-label="Factor">None (baseline effect)</td>
+<td data-label="Expected effect on the AI advantage">Advantage on Y2; advantage on Y1 not established</td>
+<td data-label="Alerts concerned">All</td>
+</tr>
+<tr>
+<td data-label="Proposition">P2</td>
+<td data-label="Factor">M1 Cyber hygiene</td>
+<td data-label="Expected effect on the AI advantage">Grows with maturity</td>
+<td data-label="Alerts concerned">All</td>
+</tr>
+<tr>
+<td data-label="Proposition">P3</td>
+<td data-label="Factor">M3 Tool fragmentation</td>
+<td data-label="Expected effect on the AI advantage">Decreases with fragmentation (rival reading: grows)</td>
+<td data-label="Alerts concerned">All</td>
+</tr>
+<tr>
+<td data-label="Proposition">P4</td>
+<td data-label="Factor">M2 Zero Trust</td>
+<td data-label="Expected effect on the AI advantage">Grows with consistency</td>
+<td data-label="Alerts concerned">Identities and access</td>
+</tr>
+</tbody>
+</table></div><p>The combination of the three moderators (higher-order interactions) is not formulated as a proposition: it is treated as an exploratory question in Section 7.</p></section><section class="sec" id="en-s5"><h2>5. Proposed validation methodology</h2><p>Validation follows a sequence of three phases, from the most exploratory to the most constraining. The same logic runs through it: comparing AI and conventional triage within contexts that differ in their hygiene, their Zero Trust and their fragmentation.</p><h3 id="en-s5-1">5.1 Phase 0. Reproducible targeted review</h3><p>A restricted systematic review, reported according to PRISMA 2020 (Page et al., 2021), will verify the gap announced in Section 1.1. It will query the intersections between SOC, alert triage, AI, cyber hygiene, Zero Trust and tool integration, and will document the databases, the search strings, the inclusion criteria and the selection. Its result conditions the final formulation of the contribution.</p><h3 id="en-s5-2">5.2 Phase 1. Exploratory qualitative study</h3><p>Semi-structured interviews will be conducted with SOC analysts, detection leads, CISOs and tool integration specialists. A target of around 12 to 20 interviews in 4 to 6 different SOCs (in-house, service providers, public and private sector) is proposed, until thematic saturation. The interviews will verify that the moderators correspond to real mechanisms and that the working definitions are operational, and will collect examples of cases where AI helped or hindered triage.</p><h3 id="en-s5-3">5.3 Phase 2. Multilevel analysis and controlled replay</h3><p><strong>Multilevel analysis.</strong> Alerts (level 1) are nested within SOCs or client perimeters (level 2). The moderators M1, M2 and M3 are measured at level 2; AI use varies within a single SOC where possible (before and after deployment, processing queues with and without AI). Mixed-effects models are estimated with cross-level interaction terms between level 1 and level 2 (Raudenbush and Bryk, 2002; Hayes, 2018). The power of level-2 interactions depends on the number of SOCs or perimeters, not on the number of alerts. If this sample size is insufficient to estimate three interactions, the study will retain two moderators, and managed service providers, which supervise several clients at different maturity levels, constitute a source of natural variation to be explored.</p><p><strong>Controlled replay.</strong> A set of alerts labelled by experts serves as ground truth. Analysts process it with or without AI assistance, and the quality of the context provided is varied (complete or degraded inventory, shared identifiers or not, integrated identity data or not). This manipulation makes it possible to approximate a causal effect of the moderators on the AI advantage, which production data cannot establish on their own. Injected scenarios (for example derived from attack simulation exercises) complete the design to estimate recall, which is not observable in production.</p><h3 id="en-s5-4">5.4 Operationalisation</h3><div aria-label="Table" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th>Construct</th>
+<th>Indicators envisaged</th>
+<th>Source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Construct">AI-assisted triage</td>
+<td data-label="Indicators envisaged">Assisted functions, level of automation, human supervision, share of recommendations corrected</td>
+<td data-label="Source">Interviews, tool logs</td>
+</tr>
+<tr>
+<td data-label="Construct">M1 Hygiene</td>
+<td data-label="Indicators envisaged">Composite score inspired by ANSSI (2017) measures: inventory coverage, patch compliance, review of accounts and privileges</td>
+<td data-label="Source">Audit, asset management data</td>
+</tr>
+<tr>
+<td data-label="Construct">M2 Zero Trust</td>
+<td data-label="Indicators envisaged">Scale inspired by the identity and device pillars of the CISA (2023) model and the principles of Rose et al. (2020): policy consistency, data integration</td>
+<td data-label="Source">Audit, architecture documentation</td>
+</tr>
+<tr>
+<td data-label="Construct">M3 Fragmentation</td>
+<td data-label="Indicators envisaged">Number of interfaces consulted per alert, share of assets resolved under a common identifier, time to obtain context</td>
+<td data-label="Source">Observation, logs</td>
+</tr>
+<tr>
+<td data-label="Construct">Y1 Detection quality</td>
+<td data-label="Indicators envisaged">Precision, recall, false-negative rate</td>
+<td data-label="Source">Labelled set, injected scenarios</td>
+</tr>
+<tr>
+<td data-label="Construct">Y2 Investigation cost</td>
+<td data-label="Indicators envisaged">Median qualification time, number of cross-consultations, manual effort</td>
+<td data-label="Source">Logs, timing</td>
+</tr>
+<tr>
+<td data-label="Construct">Controls</td>
+<td data-label="Indicators envisaged">Alert volume, rule complexity, team size and experience, perimeter, type of AI</td>
+<td data-label="Source">Operational data</td>
+</tr>
+</tbody>
+</table></div><p>The indicators will be fixed before data collection. A decrease in the number of alerts or in processing time will be interpreted as a gain only if recall is not degraded.</p><h3 id="en-s5-5">5.5 Analysis strategy</h3><p>A descriptive analysis will characterise volumes, distributions and differences between contexts. The mixed-effects models will test the interaction between AI use and each moderator, with random effects by SOC and control variables; P4 will be estimated on identity and access alerts only, then compared with other alerts as a specificity test. Sensitivity analyses will vary the definition of the indicators, and multiple comparisons will be corrected. Since AI deployment is not randomised and the most mature SOCs may adopt it first, maturity is modelled explicitly and within-SOC comparisons are favoured. No result can be anticipated before data collection.</p><h3 id="en-s5-6">5.6 Ethics and confidentiality</h3><p>Alert data are sensitive and may contain personal data. The study will require confidentiality agreements with the organisations, anonymisation or pseudonymisation of logs, and aggregated data for processing times so as not to evaluate analysts individually. Interviews will be subject to informed consent.</p></section><section class="sec" id="en-s6"><h2>6. Discussion</h2><h3 id="en-s6-1">6.1 Theoretical contributions</h3><p>The framework shifts the research question from volume to the conditional value of AI. Instead of asking whether AI reduces alert fatigue, it asks in what context it improves detection and reduces investigation cost. This reformulation has three consequences.</p><ol>
+<li><strong>AI is treated as a processing capability embedded in an environment, not as an isolated solution.</strong> Its effect is conditional, and it is this conditionality that is tested.</li>
+<li><strong>A productivity gain is not a security gain.</strong> By measuring Y1 and Y2 together, the framework prevents concluding that an AI performs well when it reduces processing time while letting more threats through.</li>
+<li><strong>A rival reading is formulated from the outset.</strong> For fragmentation, P3 and its rival proposition predict opposite signs, which makes the framework falsifiable on a point where practitioners’ intuitions diverge.</li>
+</ol><h3 id="en-s6-2">6.2 Implications for cyber governance</h3><p>Security and SOC managers can draw from the framework a diagnostic grid before investing in an AI layer. Do the observed difficulties stem from poorly calibrated rules, an incomplete inventory, poorly controlled accounts, non-interoperable tools or a lack of procedures? If the answer lies in the environment, AI risks producing a speed gain without a detection gain, and making it harder to spot the deficiencies it automates.</p><p>The framework also suggests supplementing volume indicators with measures of relevance, context, qualification cost and decision performance, and reserving ambiguous cases for human supervision. It does not oppose innovation: it seeks to determine the conditions under which innovation produces a measurable improvement.</p><h3 id="en-s6-3">6.3 Sequencing of investments</h3><p>If P2 and P4 are borne out, cyber hygiene and Zero Trust consistency are not merely stand-alone security objectives: they increase the return on investments in detection AI. If P3 is supported, tool integration precedes AI. If it is the rival proposition that prevails, AI may on the contrary be a short-term palliative for fragmentation. In both cases, the investment decision benefits from relying on a diagnosis of the context rather than on the tool’s promise alone.</p></section><section class="sec" id="en-s7"><h2>7. Limitations and future directions</h2><h3 id="en-s7-1">7.1 Limitations</h3><ul>
+<li><strong>Status of the manuscript.</strong> The article is conceptual. It rests on no original data and its propositions are not established. The literature review is preliminary and must be replaced by the reproducible review of Phase 0.</li>
+<li><strong>Construct validity.</strong> Hygiene, Zero Trust consistency and fragmentation are composite constructs whose measurement depends on context. The proposed scales are inspired by reference frameworks (ANSSI, 2017; CISA, 2023) that were not designed to measure moderators of AI effectiveness and will need to be validated.</li>
+<li><strong>Scope of Zero Trust.</strong> The moderator M2 applies only to identity and access alerts. It says nothing about the triage of other families of alerts.</li>
+<li><strong>Ground truth.</strong> Precision and recall require a reliable reference on relevant events. In production, recall is not observable and relies on injected scenarios, whose representativeness is limited.</li>
+<li><strong>Selection and causality.</strong> AI deployment is not randomised. Within-SOC comparisons and the controlled replay limit the bias without eliminating it.</li>
+<li><strong>Heterogeneity of AI.</strong> Machine-learning classifiers, correlation engines and assistants based on language models have neither the same strengths nor the same weaknesses, and evolve quickly. The type of AI is a control, but its results might not transfer from one generation of tools to the next.</li>
+<li><strong>Generalisation.</strong> In-house SOCs, service providers and public bodies differ in their resources and objectives. Comparisons must take this into account.</li>
+</ul><h3 id="en-s7-2">7.2 Future directions</h3><ul>
+<li><strong>Higher-order interactions.</strong> Do the effects of the three moderators accumulate, offset one another, or is one of them sufficient? The question is exploratory and requires a larger sample than that of a first study.</li>
+<li><strong>Temporal dimension.</strong> Maturity evolves. A longitudinal study could track the AI advantage as hygiene, Zero Trust or tool integration improve.</li>
+<li><strong>Human factors.</strong> The effect of human supervision, overreliance and complacency on Y1 could be modelled as an additional mediator or moderator.</li>
+<li><strong>Adversary adaptation.</strong> A triage AI may become a target. Extending the framework to robustness against attacks aimed at detection deserves dedicated work.</li>
+</ul></section><section class="sec" id="en-s8"><h2>8. Conclusion</h2><p>This article proposes to shift the analysis of alert fatigue from volume to the conditional value of artificial intelligence. It formulates a precise question: whether and how cyber hygiene, Zero Trust consistency and tool fragmentation modify the effect of AI on triage, in terms of detection quality and investigation cost.</p><p>The central proposition is that the operational value of AI in a SOC depends not only on its own capabilities, but also on the quality of configuration, integration and contextualisation of the environment in which it operates. Four falsifiable propositions, one of which pits two readings of the effect of fragmentation against each other, and a three-phase protocol make it possible to put it to the test.</p><p>If it is borne out, the question to ask before adding an AI layer is no longer only what the tool can do, but what the environment allows it to do. If it is refuted, the framework will at least have specified the conditions under which AI provides a measurable gain independently of context, which would also be a useful result.</p></section><section class="sec" id="en-refs"><h2>References</h2><ul class="refs">
+<li>Agence nationale de la sécurité des systèmes d’information (ANSSI). (2017). <em>Guide d’hygiène informatique : renforcer la sécurité de son système d’information en 42 mesures</em> (version 2.0). ANSSI [in French].</li>
+<li>Alahmadi, B. A., Axon, L., &amp; Martinovic, I. (2022). 99% false positives: A qualitative study of SOC analysts’ perspectives on security alarms. <em>Proceedings of the 31st USENIX Security Symposium</em>. USENIX Association.</li>
+<li>Chhetri, M. B., Tariq, S., Singh, R., Jalalvand, F., Paris, C., &amp; Nepal, S. (2024). Towards human-AI teaming to mitigate alert fatigue in Security Operations Centres. <em>ACM Transactions on Internet Technology, 24</em>(3), Article 12, 1–22. <a href="https://doi.org/10.1145/3670009" rel="noopener" target="_blank">https://doi.org/10.1145/3670009</a></li>
+<li>Cybersecurity and Infrastructure Security Agency (CISA). (2023). <em>Zero Trust Maturity Model, Version 2.0</em>. CISA.</li>
+<li>Hayes, A. F. (2018). <em>Introduction to mediation, moderation, and conditional process analysis: A regression-based approach</em> (2nd ed.). Guilford Press.</li>
+<li>Kokulu, F. B., Soneji, A., Bao, T., Shoshitaishvili, Y., Zhao, Z., Doupé, A., &amp; Ahn, G.-J. (2019). Matched and mismatched SOCs: A qualitative study on Security Operations Center issues. <em>Proceedings of the 2019 ACM SIGSAC Conference on Computer and Communications Security</em>. ACM.</li>
+<li>Ofte, H. J., &amp; Katsikas, S. (2023). Understanding situation awareness in SOCs: A systematic literature review. <em>Computers &amp; Security, 126</em>, 103069. <a href="https://doi.org/10.1016/j.cose.2022.103069" rel="noopener" target="_blank">https://doi.org/10.1016/j.cose.2022.103069</a></li>
+<li>Page, M. J., McKenzie, J. E., Bossuyt, P. M., Boutron, I., Hoffmann, T. C., Mulrow, C. D., et al. (2021). The PRISMA 2020 statement: An updated guideline for reporting systematic reviews. <em>BMJ, 372</em>, n71. <a href="https://doi.org/10.1136/bmj.n71" rel="noopener" target="_blank">https://doi.org/10.1136/bmj.n71</a></li>
+<li>Parasuraman, R., &amp; Manzey, D. H. (2010). Complacency and bias in human use of automation: An attentional integration. <em>Human Factors, 52</em>(3), 381–410.</li>
+<li>Parasuraman, R., &amp; Riley, V. (1997). Humans and automation: Use, misuse, disuse, abuse. <em>Human Factors, 39</em>(2), 230–253.</li>
+<li>Raudenbush, S. W., &amp; Bryk, A. S. (2002). <em>Hierarchical linear models: Applications and data analysis methods</em> (2nd ed.). Sage.</li>
+<li>Rose, S., Borchert, O., Mitchell, S., &amp; Connelly, S. (2020). <em>Zero Trust Architecture</em> (NIST Special Publication 800-207). National Institute of Standards and Technology. <a href="https://doi.org/10.6028/NIST.SP.800-207" rel="noopener" target="_blank">https://doi.org/10.6028/NIST.SP.800-207</a></li>
+<li>Tariq, S., Baruwal Chhetri, M., Nepal, S., &amp; Paris, C. (2025). Alert fatigue in Security Operations Centres: Research challenges and opportunities. <em>ACM Computing Surveys, 57</em>(9), Article 224, 1–38. <a href="https://doi.org/10.1145/3723158" rel="noopener" target="_blank">https://doi.org/10.1145/3723158</a></li>
+<li>Vielberth, M., Böhm, F., Fichtinger, I., &amp; Pernul, G. (2020). Security Operations Center: A systematic study and open challenges. <em>IEEE Access, 8</em>, 227756–227779.</li>
+</ul></section>
+<footer class="signature">
+<p class="sig-script" aria-label="Innocent Twagirumukiza">Innocent Twagirumukiza</p>
+<p class="sig-role">GRC and cybersecurity consultant, trainer</p>
+<a class="sig-link" href="https://twagirumukiza.github.io/" target="_blank" rel="noopener">Visit my website · twagirumukiza.github.io</a>
+<p class="legal">© 2026 Innocent Twagirumukiza. Preliminary version, October 2026.</p>
+</footer>
+</article>
+</div></div>
+</div>
+<div class="lang-block" data-lang="zh" lang="zh-Hans" hidden>
+<header class="hero wrap"><div class="frame">
+<ul class="chips"><li>概念性文章</li><li>初步版本</li><li>不含实证数据</li></ul>
+<h1 class="title">人工智能在 SOC 告警分诊中的作用：IT 卫生、零信任与工具碎片化的调节效应</h1>
+<p class="byline">Innocent Twagirumukiza · 2026 年 10 月</p>
+<div class="dl-row"><span class="dl-label">下载 PDF 版本</span><a class="dl" href="pdf/IA_triage_alertes_SOC_FR.pdf" data-file="IA_triage_alertes_SOC_FR.pdf" download><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11m0 0l-4.5-4.5M12 15l4.5-4.5M5 20h14"/></svg><span lang="fr">Français</span><small>PDF · 419 KB</small></a><a class="dl" href="pdf/AI_SOC_alert_triage_EN.pdf" data-file="AI_SOC_alert_triage_EN.pdf" download><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11m0 0l-4.5-4.5M12 15l4.5-4.5M5 20h14"/></svg><span lang="en">English</span><small>PDF · 393 KB</small></a><a class="dl is-current" href="pdf/AI_SOC_alert_triage_ZH.pdf" data-file="AI_SOC_alert_triage_ZH.pdf" download><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11m0 0l-4.5-4.5M12 15l4.5-4.5M5 20h14"/></svg><span lang="zh-Hans">中文</span><small>PDF · 786 KB</small></a></div>
+<figure class="strip"><svg viewBox="0 0 1200 120" preserveAspectRatio="none" aria-hidden="true" focusable="false"><line style="--i:0" x1="5" y1="41.7" x2="5" y2="78.3"/><line style="--i:1" x1="15" y1="53.5" x2="15" y2="66.5"/><line style="--i:2" x1="25" y1="47.7" x2="25" y2="72.3"/><line style="--i:3" x1="35" y1="46.0" x2="35" y2="74.0"/><line style="--i:4" x1="45" y1="53.5" x2="45" y2="66.5"/><line style="--i:5" x1="55" y1="48.2" x2="55" y2="71.8"/><line style="--i:6" x1="65" y1="45.5" x2="65" y2="74.5"/><line style="--i:7" x1="75" y1="51.4" x2="75" y2="68.6"/><line style="--i:8" x1="85" y1="54.5" x2="85" y2="65.5"/><line class="s" style="--i:9" x1="95" y1="16.0" x2="95" y2="104.0"/><line style="--i:10" x1="105" y1="41.2" x2="105" y2="78.8"/><line style="--i:11" x1="115" y1="53.3" x2="115" y2="66.7"/><line style="--i:12" x1="125" y1="51.8" x2="125" y2="68.2"/><line style="--i:13" x1="135" y1="49.4" x2="135" y2="70.6"/><line style="--i:14" x1="145" y1="44.3" x2="145" y2="75.7"/><line style="--i:15" x1="155" y1="46.7" x2="155" y2="73.3"/><line style="--i:16" x1="165" y1="45.1" x2="165" y2="74.9"/><line style="--i:17" x1="175" y1="44.1" x2="175" y2="75.9"/><line style="--i:18" x1="185" y1="44.5" x2="185" y2="75.5"/><line style="--i:19" x1="195" y1="53.3" x2="195" y2="66.7"/><line style="--i:20" x1="205" y1="52.5" x2="205" y2="67.5"/><line style="--i:21" x1="215" y1="43.1" x2="215" y2="76.9"/><line style="--i:22" x1="225" y1="43.3" x2="225" y2="76.7"/><line style="--i:23" x1="235" y1="46.0" x2="235" y2="74.0"/><line style="--i:24" x1="245" y1="46.8" x2="245" y2="73.2"/><line style="--i:25" x1="255" y1="43.4" x2="255" y2="76.6"/><line style="--i:26" x1="265" y1="39.7" x2="265" y2="80.3"/><line class="s" style="--i:27" x1="275" y1="16.0" x2="275" y2="104.0"/><line style="--i:28" x1="285" y1="40.2" x2="285" y2="79.8"/><line style="--i:29" x1="295" y1="54.0" x2="295" y2="66.0"/><line style="--i:30" x1="305" y1="48.4" x2="305" y2="71.6"/><line style="--i:31" x1="315" y1="47.7" x2="315" y2="72.3"/><line style="--i:32" x1="325" y1="39.2" x2="325" y2="80.8"/><line style="--i:33" x1="335" y1="43.6" x2="335" y2="76.4"/><line style="--i:34" x1="345" y1="43.3" x2="345" y2="76.7"/><line style="--i:35" x1="355" y1="42.9" x2="355" y2="77.1"/><line style="--i:36" x1="365" y1="54.8" x2="365" y2="65.2"/><line style="--i:37" x1="375" y1="49.4" x2="375" y2="70.6"/><line style="--i:38" x1="385" y1="44.3" x2="385" y2="75.7"/><line style="--i:39" x1="395" y1="40.5" x2="395" y2="79.5"/><line style="--i:40" x1="405" y1="39.9" x2="405" y2="80.1"/><line style="--i:41" x1="415" y1="51.9" x2="415" y2="68.1"/><line style="--i:42" x1="425" y1="52.6" x2="425" y2="67.4"/><line style="--i:43" x1="435" y1="40.0" x2="435" y2="80.0"/><line class="s" style="--i:44" x1="445" y1="16.0" x2="445" y2="104.0"/><line style="--i:45" x1="455" y1="52.6" x2="455" y2="67.4"/><line style="--i:46" x1="465" y1="46.5" x2="465" y2="73.5"/><line style="--i:47" x1="475" y1="48.7" x2="475" y2="71.3"/><line style="--i:48" x1="485" y1="51.6" x2="485" y2="68.4"/><line style="--i:49" x1="495" y1="51.1" x2="495" y2="68.9"/><line style="--i:50" x1="505" y1="47.0" x2="505" y2="73.0"/><line style="--i:51" x1="515" y1="42.1" x2="515" y2="77.9"/><line style="--i:52" x1="525" y1="48.2" x2="525" y2="71.8"/><line style="--i:53" x1="535" y1="52.5" x2="535" y2="67.5"/><line style="--i:54" x1="545" y1="51.4" x2="545" y2="68.6"/><line style="--i:55" x1="555" y1="44.6" x2="555" y2="75.4"/><line style="--i:56" x1="565" y1="54.0" x2="565" y2="66.0"/><line style="--i:57" x1="575" y1="41.6" x2="575" y2="78.4"/><line class="s" style="--i:58" x1="585" y1="16.0" x2="585" y2="104.0"/><line style="--i:59" x1="595" y1="51.1" x2="595" y2="68.9"/><line style="--i:60" x1="605" y1="44.3" x2="605" y2="75.7"/><line style="--i:61" x1="615" y1="45.0" x2="615" y2="75.0"/><line style="--i:62" x1="625" y1="51.3" x2="625" y2="68.7"/><line style="--i:63" x1="635" y1="47.7" x2="635" y2="72.3"/><line style="--i:64" x1="645" y1="51.1" x2="645" y2="68.9"/><line style="--i:65" x1="655" y1="46.5" x2="655" y2="73.5"/><line style="--i:66" x1="665" y1="42.4" x2="665" y2="77.6"/><line style="--i:67" x1="675" y1="44.0" x2="675" y2="76.0"/><line style="--i:68" x1="685" y1="51.9" x2="685" y2="68.1"/><line style="--i:69" x1="695" y1="52.8" x2="695" y2="67.2"/><line style="--i:70" x1="705" y1="50.6" x2="705" y2="69.4"/><line style="--i:71" x1="715" y1="53.5" x2="715" y2="66.5"/><line style="--i:72" x1="725" y1="52.5" x2="725" y2="67.5"/><line style="--i:73" x1="735" y1="53.6" x2="735" y2="66.4"/><line style="--i:74" x1="745" y1="52.3" x2="745" y2="67.7"/><line style="--i:75" x1="755" y1="51.9" x2="755" y2="68.1"/><line style="--i:76" x1="765" y1="41.6" x2="765" y2="78.4"/><line style="--i:77" x1="775" y1="38.2" x2="775" y2="81.8"/><line style="--i:78" x1="785" y1="40.4" x2="785" y2="79.6"/><line style="--i:79" x1="795" y1="44.6" x2="795" y2="75.4"/><line style="--i:80" x1="805" y1="44.5" x2="805" y2="75.5"/><line class="s" style="--i:81" x1="815" y1="16.0" x2="815" y2="104.0"/><line style="--i:82" x1="825" y1="51.4" x2="825" y2="68.6"/><line style="--i:83" x1="835" y1="48.5" x2="835" y2="71.5"/><line style="--i:84" x1="845" y1="39.4" x2="845" y2="80.6"/><line style="--i:85" x1="855" y1="44.8" x2="855" y2="75.2"/><line style="--i:86" x1="865" y1="53.6" x2="865" y2="66.4"/><line style="--i:87" x1="875" y1="46.7" x2="875" y2="73.3"/><line style="--i:88" x1="885" y1="44.1" x2="885" y2="75.9"/><line style="--i:89" x1="895" y1="49.2" x2="895" y2="70.8"/><line style="--i:90" x1="905" y1="51.6" x2="905" y2="68.4"/><line style="--i:91" x1="915" y1="52.1" x2="915" y2="67.9"/><line style="--i:92" x1="925" y1="43.4" x2="925" y2="76.6"/><line style="--i:93" x1="935" y1="40.0" x2="935" y2="80.0"/><line style="--i:94" x1="945" y1="44.6" x2="945" y2="75.4"/><line style="--i:95" x1="955" y1="40.2" x2="955" y2="79.8"/><line style="--i:96" x1="965" y1="51.9" x2="965" y2="68.1"/><line style="--i:97" x1="975" y1="46.0" x2="975" y2="74.0"/><line style="--i:98" x1="985" y1="38.2" x2="985" y2="81.8"/><line style="--i:99" x1="995" y1="46.3" x2="995" y2="73.7"/><line style="--i:100" x1="1005" y1="38.3" x2="1005" y2="81.7"/><line style="--i:101" x1="1015" y1="49.2" x2="1015" y2="70.8"/><line style="--i:102" x1="1025" y1="43.8" x2="1025" y2="76.2"/><line class="s" style="--i:103" x1="1035" y1="16.0" x2="1035" y2="104.0"/><line style="--i:104" x1="1045" y1="43.1" x2="1045" y2="76.9"/><line style="--i:105" x1="1055" y1="48.4" x2="1055" y2="71.6"/><line style="--i:106" x1="1065" y1="44.6" x2="1065" y2="75.4"/><line style="--i:107" x1="1075" y1="53.6" x2="1075" y2="66.4"/><line style="--i:108" x1="1085" y1="48.9" x2="1085" y2="71.1"/><line style="--i:109" x1="1095" y1="52.3" x2="1095" y2="67.7"/><line style="--i:110" x1="1105" y1="40.5" x2="1105" y2="79.5"/><line style="--i:111" x1="1115" y1="40.5" x2="1115" y2="79.5"/><line style="--i:112" x1="1125" y1="41.9" x2="1125" y2="78.1"/><line style="--i:113" x1="1135" y1="54.8" x2="1135" y2="65.2"/><line style="--i:114" x1="1145" y1="42.4" x2="1145" y2="77.6"/><line style="--i:115" x1="1155" y1="43.4" x2="1155" y2="76.6"/><line style="--i:116" x1="1165" y1="38.7" x2="1165" y2="81.3"/><line style="--i:117" x1="1175" y1="49.4" x2="1175" y2="70.6"/><line style="--i:118" x1="1185" y1="42.1" x2="1185" y2="77.9"/><line style="--i:119" x1="1195" y1="40.5" x2="1195" y2="79.5"/></svg><figcaption>每一条线代表一条告警，只有少数是真正的信号。</figcaption></figure>
+</div></header>
+<div class="wrap"><div class="frame layout">
+<nav class="toc" aria-label="目录"><p class="toc-title">目录</p><ol><li><a href="#zh-abstract">摘要</a></li><li><a href="#zh-s1">1. 引言</a></li><li><a href="#zh-s2">2. 文献综述</a></li><li><a href="#zh-s3">3. 概念框架</a></li><li><a href="#zh-s4">4. 研究命题</a></li><li><a href="#zh-s5">5. 拟议的验证方法</a></li><li><a href="#zh-s6">6. 讨论</a></li><li><a href="#zh-s7">7. 局限与展望</a></li><li><a href="#zh-s8">8. 结论</a></li><li><a href="#zh-refs">参考文献</a></li></ol></nav>
+<article id="main-zh" tabindex="-1">
+<section class="sec sec-abstract" id="zh-abstract"><h2>摘要</h2><p>人工智能（AI）对安全运营中心（SOC）告警分诊的影响，取决于其所部署环境的质量。本文提出一个概念框架来检验这一论点。研究问题为：IT 卫生（信息技术卫生）的成熟度、零信任（Zero Trust）实施的一致性以及工具碎片化的程度，是否以及如何改变 AI 相对于传统分诊在检测质量和调查成本上的效应。</p><p>该框架区分了信息量与信息噪声。它将 AI 的使用视为核心变量，将上述三个因素视为调节变量，将告警数量和规则配置复杂度视为控制变量。文章提出四项研究命题，每项均给出预期方向及其证伪标准。本文提出一个三阶段的验证方案：可复现的针对性综述、探索性定性研究，以及辅以已标注告警受控回放的多层次分析。</p><p>本文不报告任何实证结果。其目的是提供一个可检验的基础，以判断在何种条件下 AI 能够真正降低信息噪声，而不是将既有缺陷自动化。</p><p class="keywords"><strong>关键词：</strong> SOC；告警分诊；信息噪声；人工智能；IT 卫生；零信任；工具碎片化；调节效应；人类决策。</p></section><section class="sec" id="zh-s1"><h2>1. 引言</h2><p>安全运营中心（SOC）集中承担监控、检测、分析和事件响应工作。它们依托安全事件管理、终端检测、威胁情报和响应编排等解决方案。云环境的增多、数字身份的普及以及遥测数据来源的增长，使需要处理的数据量不断增加，而各组织则堆叠专用工具，以覆盖日益扩大的范围。</p><p>文献描述了这一状况对人的影响。Tariq 等（2025）梳理了 SOC 中告警疲劳的研究现状。Alahmadi 等（2022）与 Kokulu 等（2019）基于对分析师的访谈，报告了与告警相关性以及工具、流程和人员之间匹配度有关的困难。Vielberth 等（2020）对 SOC 及其尚未解决的挑战进行了系统研究。Ofte 与 Katsikas（2023）考察了操作人员的态势感知。</p><p>面对这些困难，AI 越来越多地被视为告警优先级排序、关联和摘要的杠杆。为此，Chhetri 等（2024）研究了分析师与 AI 之间的协作。但 AI 被嵌入的是一个已经成型的环境，其中有既定的检测规则、工具和安全实践，没有任何理由认为其贡献在不同 SOC 之间是相同的。</p><h3 id="zh-s1-1">1.1 拟填补的研究空白</h3><p>上述研究大多考察告警负荷、人机协作或态势感知。AI 的效应与技术和组织环境质量之间的关联，则较少被形式化。本文的工作假设是：这一空白确实存在，且意义重大；第 5 节所述的针对性综述须在投稿前对此予以证实或证否。</p><p>分诊 AI 需要消费上下文：资产标识、资产所有者、账户历史、补丁状态、终端安全态势，以及来自多个工具的日志。如果这些上下文不完整、不一致或分散，AI 可能运行得更快，却未必决策得更好。反之，受控良好的环境则可能使 AI 产生真实的收益。因此，上下文并非单纯的混杂变量：它可能决定了我们试图测量的效应。</p><h3 id="zh-s1-2">1.2 研究问题</h3><blockquote>
+<p>IT 卫生成熟度、零信任实施的一致性以及工具碎片化程度，如何改变 AI 相对于传统分诊在 SOC 告警分诊中对检测质量和调查成本的效应？</p>
+</blockquote><p>该问题分解为三个子问题：</p><ol>
+<li><strong>SQ1（卫生）。</strong> 当 IT 卫生更为成熟时，AI 相对于传统分诊的优势是否更为显著？</li>
+<li><strong>SQ2（碎片化）。</strong> 当工具碎片化且互操作性较差时，这一优势是否减弱，抑或 AI 反而弥补了这种碎片化？</li>
+<li><strong>SQ3（零信任）。</strong> 对于与身份和访问相关的告警，一致的零信任实施是否会增强 AI 的优势？</li>
+</ol><p>两项结果须一并考察：以漏掉威胁为代价换取的时间节省，并不构成改进。</p><h3 id="zh-s1-3">1.3 贡献与结构</h3><p>本文提供三项内容：一是区别于信息量和告警疲劳的信息噪声功能性定义；二是以 AI 为核心变量、以环境的三项特征为调节变量的调节框架；三是四项可证伪的命题及相应的验证方案。第 2 节回顾文献，第 3 节介绍框架，第 4 节提出命题，第 5 节阐述验证方法，第 6 至 8 节分别为讨论、局限与结论。</p></section><section class="sec" id="zh-s2"><h2>2. 文献综述</h2><p>本综述有意聚焦于支撑该模型的内容。它仍属初步性质：第 5 节计划在投稿前开展可复现的综述。</p><h3 id="zh-s2-1">2.1 告警数量与疲劳</h3><p>告警疲劳是指，当分析师处理大量相关性较低或难以确定相关性的告警时，可能出现的注意力或警觉性下降（Tariq 等，2025）。告警数量衡量的是负荷，而非工作的难度：两个收到相同数量告警的 SOC，可能因可用上下文、冗余程度和调查程序的不同而面临截然不同的工作量。因此需要区分所采集事件的数量、所生成告警的数量、相关告警的占比、定性的难度以及最终决策的质量。</p><h3 id="zh-s2-2">2.2 分诊中的 AI 与人机协作</h3><p>AI 可以对告警进行优先级排序、关联事件、概括上下文并自动化重复性任务。Chhetri 等（2024）主张采用这样一种协作：由自动化处理适合的任务，而人类专业能力则留给模糊的案例。然而，关于自动化的研究表明，过度信任和自满是已知的风险（Parasuraman 与 Riley，1997；Parasuraman 与 Manzey，2010）。因此，只有当漏掉相关威胁的风险没有增加时，AI 以更短时间处理更多告警才会改善安全。这一保留意见说明，应当将调查成本与检测质量一并测量。</p><h3 id="zh-s2-3">2.3 工具碎片化与上下文丢失</h3><p>SOC 组合了多种专用技术。这种多样性提高了覆盖面，却可能削弱集成度：同一资产使用不同的标识、告警冗余、需要跨多个界面手动重建上下文。Kokulu 等（2019）记录了 SOC 中技术、流程与人员之间的错位。相关变量并非产品数量，而是互操作性、数据的语义一致性以及组件之间的上下文共享。由许多集成良好的工具构成的环境，在本模型意义上并不碎片化。</p><h3 id="zh-s2-4">2.4 IT 卫生</h3><p>IT 卫生涵盖维持环境受控的基本实践：资产清单、补丁管理、账户与权限管理、安全配置。ANSSI（2017）提出了相应的措施参考框架。对于 SOC 而言，这些实践决定了一条告警能够多容易地关联到某项资产和责任人，以及基线行为的稳定性。然而，卫生状况的改善可能揭示此前不可见的事件，并暂时增加检测数量；因此预期效应涉及的是告警的可解释性，而非其数量。</p><h3 id="zh-s2-5">2.5 零信任</h3><p>零信任（Zero Trust）建立在对访问的显式验证、最小权限，以及对每次请求的上下文与风险评估之上（Rose 等，2020）。CISA（2023）的成熟度模型将其实施划分为若干支柱，其中包括身份和终端。相关控制措施产生关于身份、设备和访问条件的信息，这些信息与其他来源相关联后，有助于对访问类告警进行定性。但协调不佳的策略也可能使拒绝次数和上下文切换成倍增加。因此，零信任既不是噪声的内在来源，也不是降低噪声的保证。在本模型中，它的作用仅限于与身份和访问相关的告警，在这类告警中它提供上下文。</p><h3 id="zh-s2-6">2.6 综合与当前依据</h3><p>下表针对模型的每个要素，列出其假定作用以及本文目前拥有的文献依据程度。它凸显了需要通过针对性综述予以巩固的部分。</p><div aria-label="表格" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th>要素</th>
+<th>模型中的假定作用</th>
+<th>当前文献依据</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="要素">告警疲劳与数量</td>
+<td data-label="模型中的假定作用">控制变量</td>
+<td data-label="当前文献依据">充分（Tariq 等，2025；Alahmadi 等，2022）</td>
+</tr>
+<tr>
+<td data-label="要素">人机协作</td>
+<td data-label="模型中的假定作用">辅助分诊的框架</td>
+<td data-label="当前文献依据">部分（Chhetri 等，2024；Parasuraman 与 Manzey，2010）</td>
+</tr>
+<tr>
+<td data-label="要素">工具碎片化</td>
+<td data-label="模型中的假定作用">调节变量</td>
+<td data-label="当前文献依据">部分，主要为定性研究（Kokulu 等，2019）</td>
+</tr>
+<tr>
+<td data-label="要素">IT 卫生</td>
+<td data-label="模型中的假定作用">调节变量</td>
+<td data-label="当前文献依据">有参考框架（ANSSI，2017），关于其与 SOC 关联的研究较少</td>
+</tr>
+<tr>
+<td data-label="要素">零信任</td>
+<td data-label="模型中的假定作用">调节变量，身份与访问告警</td>
+<td data-label="当前文献依据">有参考框架（Rose 等，2020；CISA，2023），关于其与 SOC 关联的研究较少</td>
+</tr>
+<tr>
+<td data-label="要素">这些因素与 AI 之间的交互</td>
+<td data-label="模型中的假定作用">贡献的核心</td>
+<td data-label="当前文献依据">有待通过针对性综述确立</td>
+</tr>
+</tbody>
+</table></div><p>因此，空白与其说是每个因素各自缺乏文献，不如说是据我们所知，缺乏一个将它们作为 AI 对分诊效应的调节变量加以整合的框架。</p></section><section class="sec" id="zh-s3"><h2>3. 概念框架</h2><h3 id="zh-s3-1">3.1 信息噪声的定义</h3><p>信息噪声是指在特定运营情境下，安全信息中占用分析资源、却未能与其占用成比例地有助于识别、定性或管理相关威胁的那一部分。</p><p>这一定义是功能性的。非恶意的告警不一定是噪声：它可能验证某项控制的覆盖范围，或揭示配置错误。噪声需要结合调查的目的、信号的价值以及利用该信号所需的工作量来判断。它有别于信息量（一种数量），也有别于告警疲劳（反复暴露于难以应对的负荷之下可能产生的一种人的后果）。</p><h3 id="zh-s3-2">3.2 模型变量</h3><p>模型提出的是一个差值问题：AI 是否比传统分诊做得更好或成本更低，且这一差值是否随环境而变化？模型包含一个核心变量、三个调节变量、两项结果以及一组控制变量。下图给出其结构，下表给出操作性定义。</p><figure class="figure"><div class="fig-scroll"><svg viewBox="0 0 760 448" role="img" aria-label="模型示意图：三个调节变量（IT 卫生、零信任、工具碎片化）作用于 AI 辅助分诊与传统分诊之间的差值，该差值决定检测质量和调查成本；控制变量作用于所比较的两种条件。" xmlns="http://www.w3.org/2000/svg">
+<defs><marker id="arrow-zh" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path class="fx-arrow" d="M0 0L10 5L0 10z"/></marker></defs>
+<g class="fx-edge">
+<path d="M132 112V164H290V246" marker-end="url(#arrow-zh)"/><path d="M380 112V246" marker-end="url(#arrow-zh)"/><path d="M628 112V164H460V246" marker-end="url(#arrow-zh)"/>
+<path d="M224 250H500"/><path d="M500 250V320H518" marker-end="url(#arrow-zh)"/><path d="M500 320V396H518" marker-end="url(#arrow-zh)"/>
+<path class="fx-dash" d="M452 372H498" marker-end="url(#arrow-zh)"/>
+</g>
+<circle class="fx-dot" cx="500" cy="250" r="4"/>
+<rect class="fx-box" x="24" y="56" width="216" height="56" rx="8"/>
+<text class="fx-t" x="132" y="80" text-anchor="middle">M1 · IT 卫生</text><text class="fx-s" x="132" y="96" text-anchor="middle">实践成熟度</text>
+<rect class="fx-box" x="272" y="56" width="216" height="56" rx="8"/>
+<text class="fx-t" x="380" y="80" text-anchor="middle">M2 · 零信任</text><text class="fx-s" x="380" y="96" text-anchor="middle">一致性 · 访问类告警</text>
+<rect class="fx-box" x="520" y="56" width="216" height="56" rx="8"/>
+<text class="fx-t" x="628" y="80" text-anchor="middle">M3 · 工具碎片化</text><text class="fx-s" x="628" y="96" text-anchor="middle">工具互操作性</text>
+<rect class="fx-main" x="24" y="222" width="200" height="56" rx="8"/>
+<text class="fx-t" x="124" y="246" text-anchor="middle">AI 辅助分诊</text><text class="fx-s" x="124" y="262" text-anchor="middle">对比传统分诊</text>
+<text class="fx-s" x="362" y="272" text-anchor="middle">差值 Δ：AI 减传统分诊</text>
+<rect class="fx-box" x="520" y="292" width="216" height="56" rx="8"/>
+<text class="fx-t" x="628" y="316" text-anchor="middle">Y1 · 检测质量</text><text class="fx-s" x="628" y="332" text-anchor="middle">精确率、召回率</text>
+<rect class="fx-box" x="520" y="368" width="216" height="56" rx="8"/>
+<text class="fx-t" x="628" y="392" text-anchor="middle">Y2 · 调查成本</text><text class="fx-s" x="628" y="408" text-anchor="middle">时间、来源、手动工作量</text>
+<rect class="fx-box fx-dash" x="24" y="336" width="428" height="72" rx="8"/>
+<text class="fx-t" x="40" y="360">控制变量</text><text class="fx-s" x="40" y="376">告警数量、规则复杂度、</text><text class="fx-s" x="40" y="392">团队规模、范围、AI 类型</text>
+</svg></div><figcaption>图 1. 调节模型：一个核心变量、三个调节变量、两项结果。</figcaption></figure><p>三个调节变量作用于 AI 与传统分诊之间的差值，而非直接作用于结果；控制变量则作用于所比较的两种条件。</p><div aria-label="表格" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th>角色</th>
+<th>变量</th>
+<th>操作性定义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="角色">核心</td>
+<td data-label="变量">AI 辅助分诊</td>
+<td data-label="操作性定义">使用 AI 对告警进行优先级排序、关联或摘要，与基于规则和手动程序的传统分诊相比较。以其功能、自动化程度和人工监督来描述。</td>
+</tr>
+<tr>
+<td data-label="角色">调节变量 M1</td>
+<td data-label="变量">IT 卫生成熟度</td>
+<td data-label="操作性定义">资产清单的完整性、补丁合规性、账户与权限的受控程度、配置的维护情况。</td>
+</tr>
+<tr>
+<td data-label="角色">调节变量 M2</td>
+<td data-label="变量">零信任实施的一致性</td>
+<td data-label="操作性定义">访问策略的协调统一，以及身份和终端数据的集成。应用于与身份和访问相关的告警。</td>
+</tr>
+<tr>
+<td data-label="角色">调节变量 M3</td>
+<td data-label="变量">工具碎片化</td>
+<td data-label="操作性定义">实际互操作性较低：同一资产没有共同标识、上下文分散、每条告警需查阅的界面数量。</td>
+</tr>
+<tr>
+<td data-label="角色">结果 Y1</td>
+<td data-label="变量">检测质量</td>
+<td data-label="操作性定义">相关告警上的精确率、召回率和漏报率。</td>
+</tr>
+<tr>
+<td data-label="角色">结果 Y2</td>
+<td data-label="变量">调查成本</td>
+<td data-label="操作性定义">定性所需时间、所查阅的来源数量、每条告警的手动工作量。</td>
+</tr>
+<tr>
+<td data-label="角色">控制</td>
+<td data-label="变量">数量与配置</td>
+<td data-label="操作性定义">告警数量、规则配置复杂度、团队规模与经验、受监控范围、AI 类型。</td>
+</tr>
+</tbody>
+</table></div><h3 id="zh-s3-3">3.3 对模型的解读</h3><p>设 Δ 为 AI 辅助分诊与传统分诊之间的性能差值，分别在 Y1 和 Y2 上测量。调节变量是使 Δ 发生变化的变量：AI 的效应并不被假定为恒定，而被假定为有条件的。该模型并不断言 AI 总体上有效或无效；它说明的是其效应在何处、在何种条件下发生变化。</p><p>以下三点说明对这一解读加以限定。</p><ol>
+<li><strong>成熟度与一致性是两个不同的构念。</strong> 卫生以实践的成熟度来衡量，零信任则以架构及其策略的一致性来衡量。二者将分别加以操作化（第 5 节）。</li>
+<li><strong>数量与规则复杂度是控制变量，而非研究对象。</strong> 它们在所比较的两种条件下均影响告警负荷，但本框架并不试图解释其自身的效应。</li>
+<li><strong>存在竞争性解读。</strong> 卫生也可能作为改变告警数量的因素发挥作用（直接效应），而最成熟的 SOC 可能正是最先采用 AI 的那些（选择偏差）。第 5 节的方案规定了同一 SOC 内部的比较，以限制后一种风险。</li>
+</ol></section><section class="sec" id="zh-s4"><h2>4. 研究命题</h2><p>以下四项命题是有待检验的理论陈述，而非结果。每项命题均说明预期效应、作用机制以及何种情形将证伪它。“AI 的优势”针对每项结果，指相对于传统分诊而言有利于 AI 的差值：更高的检测质量或更低的调查成本。</p><div class="prop" id="zh-p1"><h3><span class="code">P1</span>基准效应：收益首先体现在成本上</h3><p><strong>命题陈述。</strong> 平均而言，AI 辅助分诊相对于传统分诊降低了调查成本（Y2），但这一降低不足以确立检测质量（Y1）的改善，后者的差值可能为零、为正或为负。</p><p><strong>作用机制。</strong> AI 首先通过优先级排序和摘要来提高定性的速度。检测质量取决于排序的准确性以及掩盖重要告警的风险，这是决策辅助系统已知的风险（Parasuraman 与 Manzey，2010）。</p><p><strong>证伪条件。</strong> 若 AI 下的成本并不更低，或者 Y1 上的优势在所有环境中均一致为正（这将使区分两项结果失去意义），则 P1 被证伪。</p></div><div class="prop" id="zh-p2"><h3><span class="code">P2</span>IT 卫生：优势随成熟度提高而增大</h3><p><strong>命题陈述。</strong> 在控制告警数量的条件下，IT 卫生成熟度（M1）越高，AI 在 Y1 和 Y2 上的优势越大。</p><p><strong>作用机制。</strong> 完整的资产清单、受控的账户和稳定的配置，使 AI 能够将每条告警关联到某项资产和责任人，并依托稳定的基线行为。</p><p><strong>注意。</strong> 更好的卫生状况可能揭示此前不可见的事件，并暂时增加检测数量；因此需要控制告警数量。</p><p><strong>证伪条件。</strong> 在控制数量之后，AI 的使用与 M1 之间的交互为零或符号相反。</p></div><div class="prop" id="zh-p3"><h3><span class="code">P3</span>工具碎片化：优势减弱，或 AI 予以弥补</h3><p><strong>命题陈述。</strong> 工具越碎片化、互操作性越差（M3），AI 在 Y1 和 Y2 上的优势越小。</p><p><strong>作用机制。</strong> 不一致的标识和分散的上下文限制了 AI 关联数据的能力；其输出因而建立在不完整的上下文之上。</p><p><strong>竞争性命题。</strong> 相反，AI 也可能通过关联分析师否则须逐一查阅的分散来源，来弥补碎片化。在这种情况下，优势在碎片化的环境中会更为显著。这两种解读相互对立，且可通过数据加以区分；对二者作出判别是本研究可能的贡献。</p><p><strong>证伪条件。</strong> AI 的使用与 M3 之间的交互为零或为正。正向交互将支持竞争性解读。</p></div><div class="prop" id="zh-p4"><h3><span class="code">P4</span>零信任：对访问类告警，优势随一致性提高而增大</h3><p><strong>命题陈述。</strong> 对于与身份和访问相关的告警，零信任实施（M2）越一致（即策略得到协调统一，且身份和终端数据已集成），AI 在 Y1 和 Y2 上的优势越大。</p><p><strong>作用机制。</strong> 零信任控制为定性访问类告警提供了可利用的上下文：终端安全态势、会话风险、所适用的访问决策。</p><p><strong>注意。</strong> 协调不佳的策略可能使拒绝次数和上下文切换成倍增加，并削弱零信任对分诊的贡献。</p><p><strong>证伪条件。</strong> 这些告警上不存在交互，或者与访问无关的告警上存在相同幅度的交互。后一种情形表明，所测量的构念反映的是总体成熟度，而非零信任。</p></div><h3 id="zh-s4-summary">综合</h3><div aria-label="表格" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th>命题</th>
+<th>因素</th>
+<th>对 AI 优势的预期效应</th>
+<th>涉及的告警</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="命题">P1</td>
+<td data-label="因素">无（基准效应）</td>
+<td data-label="对 AI 优势的预期效应">Y2 上有优势；Y1 上的优势尚未确立</td>
+<td data-label="涉及的告警">全部</td>
+</tr>
+<tr>
+<td data-label="命题">P2</td>
+<td data-label="因素">M1 IT 卫生</td>
+<td data-label="对 AI 优势的预期效应">随成熟度提高而增大</td>
+<td data-label="涉及的告警">全部</td>
+</tr>
+<tr>
+<td data-label="命题">P3</td>
+<td data-label="因素">M3 工具碎片化</td>
+<td data-label="对 AI 优势的预期效应">随碎片化加剧而减小（竞争性解读：增大）</td>
+<td data-label="涉及的告警">全部</td>
+</tr>
+<tr>
+<td data-label="命题">P4</td>
+<td data-label="因素">M2 零信任</td>
+<td data-label="对 AI 优势的预期效应">随一致性提高而增大</td>
+<td data-label="涉及的告警">身份与访问</td>
+</tr>
+</tbody>
+</table></div><p>三个调节变量的叠加（高阶交互）未被表述为命题：它在第 7 节中作为探索性问题处理。</p></section><section class="sec" id="zh-s5"><h2>5. 拟议的验证方法</h2><p>验证按三个阶段依次展开，从最具探索性到最具约束性。一条共同的逻辑贯穿其中：在卫生、零信任和碎片化程度各不相同的情境内部，比较 AI 与传统分诊。</p><h3 id="zh-s5-1">5.1 阶段 0。可复现的针对性综述</h3><p>将开展一项范围有限的系统综述，依据 PRISMA 2020（Page 等，2021）进行报告，以核实第 1.1 节所提出的空白。它将检索 SOC、告警分诊、AI、IT 卫生、零信任与工具集成之间的交叉领域，并记录数据库、检索式、纳入标准和筛选过程。其结果决定了贡献的最终表述。</p><h3 id="zh-s5-2">5.2 阶段 1。探索性定性研究</h3><p>将对 SOC 分析师、检测负责人、首席信息安全官（CISO）以及工具集成专家开展半结构化访谈。建议的目标为在 4 至 6 个不同的 SOC（内部、服务提供商、公共部门和私营部门）中进行约 12 至 20 次访谈，直至达到主题饱和。访谈将核实调节变量是否对应于真实的机制、操作性定义是否可操作，并收集 AI 帮助或妨碍分诊的案例示例。</p><h3 id="zh-s5-3">5.3 阶段 2。多层次分析与受控回放</h3><p><strong>多层次分析。</strong> 告警（第 1 层）嵌套于 SOC 或客户范围（第 2 层）之中。调节变量 M1、M2 和 M3 在第 2 层测量；在可能的情况下，AI 的使用在同一 SOC 内部发生变化（部署前后、使用与不使用 AI 的处理队列）。估计包含第 1 层与第 2 层之间交互项的混合效应模型（Raudenbush 与 Bryk，2002；Hayes，2018）。第 2 层交互的统计功效取决于 SOC 或范围的数量，而非告警的数量。如果该样本量不足以估计三个交互，研究将只保留两个调节变量；而托管服务提供商同时监管多个成熟度水平不同的客户，构成了一个值得探索的自然变异来源。</p><p><strong>受控回放。</strong> 由专家标注的告警数据集作为基准真值。分析师在有或无 AI 辅助的条件下对其进行处理，并改变所提供上下文的质量（资产清单完整或降级、标识共用与否、身份数据是否集成）。这一操纵使我们能够逼近调节变量对 AI 优势的因果效应，而仅凭生产数据无法确立这一点。注入的场景（例如来自攻击模拟演练的场景）补充了该设计，用以估计召回率，而召回率在生产环境中是不可观测的。</p><h3 id="zh-s5-4">5.4 操作化</h3><div aria-label="表格" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th>构念</th>
+<th>拟采用的指标</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="构念">AI 辅助分诊</td>
+<td data-label="拟采用的指标">受辅助的功能、自动化程度、人工监督、被修正的建议占比</td>
+<td data-label="来源">访谈、工具日志</td>
+</tr>
+<tr>
+<td data-label="构念">M1 卫生</td>
+<td data-label="拟采用的指标">受 ANSSI（2017）措施启发的综合得分：资产清单覆盖率、补丁合规性、账户与权限审查</td>
+<td data-label="来源">审计、资产管理数据</td>
+</tr>
+<tr>
+<td data-label="构念">M2 零信任</td>
+<td data-label="拟采用的指标">受 CISA（2023）模型的身份和终端支柱以及 Rose 等（2020）原则启发的量表：策略一致性、数据集成</td>
+<td data-label="来源">审计、架构文档</td>
+</tr>
+<tr>
+<td data-label="构念">M3 碎片化</td>
+<td data-label="拟采用的指标">每条告警所查阅的界面数量、在共同标识下得到解析的资产占比、获取上下文的时延</td>
+<td data-label="来源">观察、日志</td>
+</tr>
+<tr>
+<td data-label="构念">Y1 检测质量</td>
+<td data-label="拟采用的指标">精确率、召回率、漏报率</td>
+<td data-label="来源">标注数据集、注入场景</td>
+</tr>
+<tr>
+<td data-label="构念">Y2 调查成本</td>
+<td data-label="拟采用的指标">定性时间中位数、交叉查阅次数、手动工作量</td>
+<td data-label="来源">日志、计时</td>
+</tr>
+<tr>
+<td data-label="构念">控制</td>
+<td data-label="拟采用的指标">告警数量、规则复杂度、团队规模与经验、范围、AI 类型</td>
+<td data-label="来源">运营数据</td>
+</tr>
+</tbody>
+</table></div><p>指标将在数据收集之前确定。只有当召回率没有下降时，告警数量或处理时间的减少才会被解释为收益。</p><h3 id="zh-s5-5">5.5 分析策略</h3><p>描述性分析将刻画数量、分布以及不同情境之间的差异。混合效应模型将检验 AI 的使用与每个调节变量之间的交互，设置按 SOC 划分的随机效应并纳入控制变量；P4 将仅在身份与访问告警上估计，然后与其他告警进行比较，作为特异性检验。敏感性分析将改变指标的定义，多重比较将予以校正。由于 AI 的部署并非随机，且最成熟的 SOC 可能最先采用它，因此成熟度被显式建模，并优先采用 SOC 内部比较。在数据收集之前，不能预期任何结果。</p><h3 id="zh-s5-6">5.6 伦理与保密</h3><p>告警数据具有敏感性，可能包含个人数据。研究将要求与各组织签订保密协议、对日志进行匿名化或假名化，并对处理时间使用汇总数据，以避免对分析师个人进行评价。访谈将取得知情同意。</p></section><section class="sec" id="zh-s6"><h2>6. 讨论</h2><h3 id="zh-s6-1">6.1 理论贡献</h3><p>该框架将研究问题从数量转向 AI 的条件性价值。它不是问 AI 是否减轻了告警疲劳，而是问在何种情境下它能改善检测并降低调查成本。这一重新表述带来三点后果。</p><ol>
+<li><strong>AI 被视为嵌入环境之中的处理能力，而非孤立的解决方案。</strong> 其效应是有条件的，而被检验的正是这种条件性。</li>
+<li><strong>生产率的提高并不等于安全性的提高。</strong> 通过同时测量 Y1 和 Y2，该框架避免了对一种缩短处理时间却放过更多威胁的 AI 得出其表现良好的结论。</li>
+<li><strong>竞争性解读从一开始就被提出。</strong> 就碎片化而言，P3 及其竞争性命题预测了相反的符号，这使该框架在从业者直觉出现分歧的问题上具有可证伪性。</li>
+</ol><h3 id="zh-s6-2">6.2 对网络安全治理的启示</h3><p>安全与 SOC 负责人可以从该框架中得到一个诊断框架，供其在投资 AI 层之前使用。所观察到的困难是源于校准不当的规则、不完整的资产清单、失控的账户、无法互操作的工具，还是缺乏程序？如果答案出在环境上，AI 就有可能带来速度的提升而无检测上的收益，并使其所自动化的缺陷更难被发现。</p><p>该框架还建议，在数量指标之外补充相关性、上下文、定性成本和决策绩效方面的度量，并将模糊的案例保留给人工监督。它并不反对创新：它试图确定创新在何种条件下能带来可衡量的改进。</p><h3 id="zh-s6-3">6.3 投资的先后次序</h3><p>如果 P2 和 P4 得到验证，IT 卫生和零信任的一致性就不只是独立的安全目标：它们还提高了检测类 AI 投资的回报。如果 P3 得到支持，工具集成应先于 AI。如果是竞争性命题占上风，AI 则反而可以成为碎片化的短期缓解手段。无论哪种情形，投资决策都宜建立在对情境的诊断之上，而不是仅仅依赖工具的承诺。</p></section><section class="sec" id="zh-s7"><h2>7. 局限与展望</h2><h3 id="zh-s7-1">7.1 局限</h3><ul>
+<li><strong>稿件性质。</strong> 本文为概念性文章。它不依赖任何原始数据，其命题尚未确立。文献综述是初步的，须由阶段 0 的可复现综述取代。</li>
+<li><strong>构念效度。</strong> 卫生、零信任一致性和碎片化都是复合构念，其测量取决于情境。所提议的量表受参考框架（ANSSI，2017；CISA，2023）启发，而这些框架并非为测量 AI 效能的调节变量而设计，须加以验证。</li>
+<li><strong>零信任的适用范围。</strong> 调节变量 M2 仅适用于身份与访问告警。它对其他类别告警的分诊没有任何说明。</li>
+<li><strong>基准真值。</strong> 精确率和召回率需要关于相关事件的可靠基准。在生产环境中，召回率不可观测，只能依赖注入的场景，而其代表性有限。</li>
+<li><strong>选择与因果。</strong> AI 的部署并非随机。SOC 内部比较和受控回放限制了偏差，但无法将其消除。</li>
+<li><strong>AI 的异质性。</strong> 机器学习分类器、关联引擎和基于语言模型的助手，其优势与缺陷各不相同，且演进迅速。AI 类型是一个控制变量，但其结果未必能从一代工具推广到另一代工具。</li>
+<li><strong>推广性。</strong> 内部 SOC、服务提供商和公共机构在资源和目标上各不相同。比较时必须将此考虑在内。</li>
+</ul><h3 id="zh-s7-2">7.2 展望</h3><ul>
+<li><strong>高阶交互。</strong> 三个调节变量的效应是相互叠加、相互抵消，还是其中一个便已足够？这一问题具有探索性，需要比首次研究更大的样本。</li>
+<li><strong>时间维度。</strong> 成熟度是不断演进的。纵向研究可以追踪当卫生、零信任或工具集成得到改善时 AI 优势的变化。</li>
+<li><strong>人的因素。</strong> 人工监督、过度信任和自满对 Y1 的影响，可以作为额外的中介变量或调节变量加以建模。</li>
+<li><strong>对手的适应。</strong> 分诊 AI 可能成为攻击目标。将该框架扩展到针对检测的攻击下的稳健性，值得专门研究。</li>
+</ul></section><section class="sec" id="zh-s8"><h2>8. 结论</h2><p>本文提出，将对告警疲劳的分析从数量转向人工智能的条件性价值。它提出了一个明确的问题：IT 卫生、零信任的一致性和工具碎片化是否以及如何改变 AI 对分诊的效应，具体体现在检测质量和调查成本上。</p><p>核心命题是：AI 在 SOC 中的运营价值，不仅取决于其自身能力，还取决于其所处环境在配置、集成和上下文化方面的质量。四项可证伪的命题（其中一项使关于碎片化效应的两种解读相互对立）以及一个三阶段方案，使这一命题得以接受检验。</p><p>如果它得到验证，那么在增加一层 AI 之前应当提出的问题，就不再仅仅是工具能够做什么，而是环境允许它做什么。如果它被证伪，该框架至少也将厘清 AI 在何种条件下能够不受情境影响而带来可衡量的收益，这同样会是一个有用的结果。</p></section><section class="sec" id="zh-refs"><h2>参考文献</h2><ul class="refs">
+<li>Agence nationale de la sécurité des systèmes d’information (ANSSI). (2017). <em>Guide d’hygiène informatique : renforcer la sécurité de son système d’information en 42 mesures</em> (version 2.0). ANSSI.</li>
+<li>Alahmadi, B. A., Axon, L., &amp; Martinovic, I. (2022). 99% false positives: A qualitative study of SOC analysts’ perspectives on security alarms. <em>Proceedings of the 31st USENIX Security Symposium</em>. USENIX Association.</li>
+<li>Chhetri, M. B., Tariq, S., Singh, R., Jalalvand, F., Paris, C., &amp; Nepal, S. (2024). Towards human-AI teaming to mitigate alert fatigue in Security Operations Centres. <em>ACM Transactions on Internet Technology, 24</em>(3), Article 12, 1–22. <a href="https://doi.org/10.1145/3670009" rel="noopener" target="_blank">https://doi.org/10.1145/3670009</a></li>
+<li>Cybersecurity and Infrastructure Security Agency (CISA). (2023). <em>Zero Trust Maturity Model, Version 2.0</em>. CISA.</li>
+<li>Hayes, A. F. (2018). <em>Introduction to mediation, moderation, and conditional process analysis: A regression-based approach</em> (2nd ed.). Guilford Press.</li>
+<li>Kokulu, F. B., Soneji, A., Bao, T., Shoshitaishvili, Y., Zhao, Z., Doupé, A., &amp; Ahn, G.-J. (2019). Matched and mismatched SOCs: A qualitative study on Security Operations Center issues. <em>Proceedings of the 2019 ACM SIGSAC Conference on Computer and Communications Security</em>. ACM.</li>
+<li>Ofte, H. J., &amp; Katsikas, S. (2023). Understanding situation awareness in SOCs: A systematic literature review. <em>Computers &amp; Security, 126</em>, 103069. <a href="https://doi.org/10.1016/j.cose.2022.103069" rel="noopener" target="_blank">https://doi.org/10.1016/j.cose.2022.103069</a></li>
+<li>Page, M. J., McKenzie, J. E., Bossuyt, P. M., Boutron, I., Hoffmann, T. C., Mulrow, C. D., et al. (2021). The PRISMA 2020 statement: An updated guideline for reporting systematic reviews. <em>BMJ, 372</em>, n71. <a href="https://doi.org/10.1136/bmj.n71" rel="noopener" target="_blank">https://doi.org/10.1136/bmj.n71</a></li>
+<li>Parasuraman, R., &amp; Manzey, D. H. (2010). Complacency and bias in human use of automation: An attentional integration. <em>Human Factors, 52</em>(3), 381–410.</li>
+<li>Parasuraman, R., &amp; Riley, V. (1997). Humans and automation: Use, misuse, disuse, abuse. <em>Human Factors, 39</em>(2), 230–253.</li>
+<li>Raudenbush, S. W., &amp; Bryk, A. S. (2002). <em>Hierarchical linear models: Applications and data analysis methods</em> (2nd ed.). Sage.</li>
+<li>Rose, S., Borchert, O., Mitchell, S., &amp; Connelly, S. (2020). <em>Zero Trust Architecture</em> (NIST Special Publication 800-207). National Institute of Standards and Technology. <a href="https://doi.org/10.6028/NIST.SP.800-207" rel="noopener" target="_blank">https://doi.org/10.6028/NIST.SP.800-207</a></li>
+<li>Tariq, S., Baruwal Chhetri, M., Nepal, S., &amp; Paris, C. (2025). Alert fatigue in Security Operations Centres: Research challenges and opportunities. <em>ACM Computing Surveys, 57</em>(9), Article 224, 1–38. <a href="https://doi.org/10.1145/3723158" rel="noopener" target="_blank">https://doi.org/10.1145/3723158</a></li>
+<li>Vielberth, M., Böhm, F., Fichtinger, I., &amp; Pernul, G. (2020). Security Operations Center: A systematic study and open challenges. <em>IEEE Access, 8</em>, 227756–227779.</li>
+</ul></section>
+<footer class="signature">
+<p class="sig-script" aria-label="Innocent Twagirumukiza">Innocent Twagirumukiza</p>
+<p class="sig-role">GRC 与网络安全顾问、培训师</p>
+<a class="sig-link" href="https://twagirumukiza.github.io/" target="_blank" rel="noopener">访问我的网站 · twagirumukiza.github.io</a>
+<p class="legal">© 2026 Innocent Twagirumukiza。初步版本，2026 年 10 月。</p>
+</footer>
+</article>
+</div></div>
+</div>
 <script>
-var M={
-fr:{kicker:"Innocent Twagirumukiza · article conceptuel (cadre de recherche) · 18 octobre 2026",title:"L’intelligence artificielle dans le triage des alertes des SOC",sub:"Le rôle modérateur de l’hygiène informatique, du Zero Trust et de la fragmentation des outils",dl:"Télécharger l’étude",dlt:"Le PDF reprend exactement le texte de cette page.",foot:"Auteur et site :",miss:""},
-en:{kicker:"Innocent Twagirumukiza · conceptual article (research framework) · 18 October 2026",title:"Artificial intelligence in SOC alert triage",sub:"The moderating role of cyber hygiene, Zero Trust and tool fragmentation",dl:"Download the study",dlt:"The PDF reproduces exactly the text of this page.",foot:"Author and website:",miss:"The full English text is being added and will be identical to the PDF."},
-zh:{kicker:"Innocent Twagirumukiza · 概念性文章（研究框架）· 2026年10月18日",title:"人工智能在SOC告警分诊中的应用",sub:"IT卫生、零信任与工具碎片化的调节作用",dl:"下载全文",dlt:"PDF与本页文字完全一致。",foot:"作者与网站：",miss:"完整中文全文正在添加中，内容将与PDF完全一致。"}};
-var root=document.documentElement,size=100;
-function st(k,v){try{localStorage.setItem(k,v)}catch(e){}}
-function ld(k){try{return localStorage.getItem(k)}catch(e){return null}}
-function blk(b){
- if(b.t=="h2")return '<h2 id="'+b.id+'">'+b.x+'</h2>';
- if(b.t=="h3")return '<h3>'+b.x+'</h3>';
- if(b.t=="p")return '<p>'+b.x+'</p>';
- if(b.t=="note")return '<p class="nt">'+b.x+'</p>';
- if(b.t=="ol"||b.t=="ul")return '<'+b.t+'>'+b.x.map(function(i){return '<li>'+i+'</li>'}).join('')+'</'+b.t+'>';
- if(b.t=="table")return '<div class="tw"><table><thead><tr>'+b.head.map(function(h){return '<th>'+h+'</th>'}).join('')+'</tr></thead><tbody>'+b.rows.map(function(r){return '<tr>'+r.map(function(c){return '<td>'+c+'</td>'}).join('')+'</tr>'}).join('')+'</tbody></table></div>';
- if(b.t=='svg')return '<figure>'+b.x+'<figcaption>'+b.cap+'</figcaption></figure>';
- return '';}
-function apply(l){
- var m=M[l],c=C[l];root.lang=l=="zh"?"zh-Hans":l;
- ["kicker","title","sub","foot","dlt"].forEach(function(k){document.getElementById(k).textContent=m[k]});
- document.getElementById("dlh").textContent=m.dl;document.title=m.title;
- document.getElementById("content").innerHTML=c?c.map(blk).join(''):'<p class="nt">'+m.miss+'</p>';
- document.getElementById("nav").innerHTML=(c||[]).filter(function(b){return b.t=="h2"&&b.s}).map(function(b){return '<a href="#'+b.id+'">'+b.s+'</a>'}).join('');
- document.querySelectorAll("[data-lang]").forEach(function(b){b.setAttribute("aria-pressed",b.dataset.lang==l)});
- st("lang",l);}
-function setSize(s){size=Math.max(80,Math.min(150,s));root.style.setProperty("--fs",size+"%");st("size",size)}
-function setTheme(t){root.setAttribute("data-theme",t);st("theme",t)}
-document.querySelectorAll("[data-lang]").forEach(function(b){b.onclick=function(){apply(b.dataset.lang)}});
-document.getElementById("inc").onclick=function(){setSize(size+10)};
-document.getElementById("dec").onclick=function(){setSize(size-10)};
-document.getElementById("theme").onclick=function(){var cur=root.getAttribute("data-theme")||(matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light");setTheme(cur=="dark"?"light":"dark")};
-var sl=ld("lang"),ss=parseInt(ld("size"),10),th=ld("theme"),nl=(navigator.language||"fr").slice(0,2);
-if(ss)setSize(ss);if(th)setTheme(th);
-apply(sl&&M[sl]?sl:(M[nl]?nl:"fr"));
+(function () {
+  'use strict';
+  var root = document.documentElement;
+  var LANGS = ['fr', 'en', 'zh'];
+  var HTML_LANG = { fr: 'fr', en: 'en', zh: 'zh-Hans' };
+  var TITLES = { fr: 'IA et triage SOC', en: 'AI and SOC triage', zh: 'AI 与 SOC 分诊' };
+  var UI = {
+    fr: { skip: 'Aller au contenu', menu: 'Ouvrir le sommaire', theme: 'Basculer entre thème clair et sombre', smaller: 'Réduire la taille du texte', larger: 'Agrandir la taille du texte', lang: 'Langue' },
+    en: { skip: 'Skip to content', menu: 'Open contents', theme: 'Switch between light and dark theme', smaller: 'Decrease text size', larger: 'Increase text size', lang: 'Language' },
+    zh: { skip: '跳到正文', menu: '打开目录', theme: '切换浅色或深色主题', smaller: '减小字号', larger: '增大字号', lang: '语言' }
+  };
+  var ZOOM = [0.875, 1, 1.125, 1.25, 1.4];
+
+  var store = {
+    get: function (k) { try { return window.localStorage.getItem(k); } catch (e) { return null; } },
+    set: function (k, v) { try { window.localStorage.setItem(k, v); } catch (e) { /* storage unavailable */ } }
+  };
+
+  var blocks = {};
+  LANGS.forEach(function (l) { blocks[l] = document.querySelector('.lang-block[data-lang="' + l + '"]'); });
+  var scrim = document.getElementById('scrim');
+  var menuBtn = document.getElementById('menu-btn');
+  var themeBtn = document.getElementById('theme-btn');
+  var progress = document.getElementById('progress');
+  var lang = 'fr';
+  var sections = [];
+  var activeKey = null;
+
+  /* ---------- theme ---------- */
+  var mq = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+  function effectiveTheme() {
+    var t = root.getAttribute('data-theme');
+    if (t === 'dark' || t === 'light') return t;
+    return mq && mq.matches ? 'dark' : 'light';
+  }
+  function paintThemeBtn() { themeBtn.setAttribute('data-mode', effectiveTheme()); }
+  themeBtn.addEventListener('click', function () {
+    var next = effectiveTheme() === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    store.set('soc-theme', next);
+    paintThemeBtn();
+  });
+  if (mq && mq.addEventListener) mq.addEventListener('change', paintThemeBtn);
+  var savedTheme = store.get('soc-theme');
+  if (savedTheme === 'dark' || savedTheme === 'light') root.setAttribute('data-theme', savedTheme);
+  paintThemeBtn();
+
+  /* ---------- text size ---------- */
+  var zi = 1;
+  var savedZoom = parseInt(store.get('soc-zoom'), 10);
+  if (savedZoom >= 0 && savedZoom < ZOOM.length) zi = savedZoom;
+  var btnSmaller = document.getElementById('size-down');
+  var btnLarger = document.getElementById('size-up');
+  function applyZoom() {
+    root.style.setProperty('--zoom', ZOOM[zi]);
+    btnSmaller.disabled = zi === 0;
+    btnLarger.disabled = zi === ZOOM.length - 1;
+    store.set('soc-zoom', String(zi));
+  }
+  btnSmaller.addEventListener('click', function () { if (zi > 0) { zi--; applyZoom(); } });
+  btnLarger.addEventListener('click', function () { if (zi < ZOOM.length - 1) { zi++; applyZoom(); } });
+  applyZoom();
+
+  /* ---------- language ---------- */
+  function detectLang() {
+    var m = /^#(fr|en|zh)(?:-|$)/.exec(location.hash || '');
+    if (m) return m[1];
+    var s = store.get('soc-lang');
+    if (LANGS.indexOf(s) >= 0) return s;
+    var nav = (navigator.languages && navigator.languages[0]) || navigator.language || 'fr';
+    nav = String(nav).toLowerCase();
+    if (nav.indexOf('zh') === 0) return 'zh';
+    if (nav.indexOf('fr') === 0) return 'fr';
+    return 'en';
+  }
+  function collectSections() {
+    sections = [].slice.call(blocks[lang].querySelectorAll('article > section[id]'));
+  }
+  function applyUI() {
+    var t = UI[lang];
+    [].forEach.call(document.querySelectorAll('[data-i18n]'), function (el) { el.textContent = t[el.getAttribute('data-i18n')]; });
+    [].forEach.call(document.querySelectorAll('[data-i18n-aria]'), function (el) { el.setAttribute('aria-label', t[el.getAttribute('data-i18n-aria')]); });
+  }
+  function setLang(l, keepPosition) {
+    var key = keepPosition ? activeKey : null;
+    var scrolled = keepPosition && window.scrollY > 240;
+    lang = l;
+    LANGS.forEach(function (x) { blocks[x].hidden = x !== l; });
+    [].forEach.call(document.querySelectorAll('.seg button'), function (b) {
+      b.setAttribute('aria-pressed', b.getAttribute('data-lang') === l ? 'true' : 'false');
+    });
+    root.setAttribute('lang', HTML_LANG[l]);
+    document.title = TITLES[l];
+    var skip = document.getElementById('skip');
+    if (skip) skip.setAttribute('href', '#main-' + l);
+    store.set('soc-lang', l);
+    closeMenu();
+    applyUI();
+    collectSections();
+    if (scrolled && key) {
+      var target = document.getElementById(l + '-' + key);
+      if (target) target.scrollIntoView({ block: 'start', behavior: 'auto' });
+    }
+    onScroll();
+  }
+  [].forEach.call(document.querySelectorAll('.seg button'), function (b) {
+    b.addEventListener('click', function () {
+      var l = b.getAttribute('data-lang');
+      if (l === lang) return;
+      setLang(l, true);
+      try { history.replaceState(null, '', '#' + l); } catch (e) { /* ignore */ }
+    });
+  });
+
+  /* ---------- contents drawer (narrow screens) ---------- */
+  function openMenu() {
+    var toc = blocks[lang].querySelector('.toc');
+    toc.classList.add('open');
+    scrim.hidden = false;
+    menuBtn.setAttribute('aria-expanded', 'true');
+  }
+  function closeMenu() {
+    LANGS.forEach(function (x) { var t = blocks[x].querySelector('.toc'); if (t) t.classList.remove('open'); });
+    scrim.hidden = true;
+    menuBtn.setAttribute('aria-expanded', 'false');
+  }
+  menuBtn.addEventListener('click', function () {
+    var toc = blocks[lang].querySelector('.toc');
+    if (toc.classList.contains('open')) closeMenu(); else openMenu();
+  });
+  scrim.addEventListener('click', closeMenu);
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeMenu(); });
+  [].forEach.call(document.querySelectorAll('.toc a'), function (a) { a.addEventListener('click', closeMenu); });
+
+  /* ---------- reading position: progress bar + active contents entry ---------- */
+  var ticking = false;
+  function onScroll() {
+    if (ticking) return;
+    ticking = true;
+    window.requestAnimationFrame(function () {
+      ticking = false;
+      var doc = document.documentElement;
+      var max = doc.scrollHeight - window.innerHeight;
+      progress.style.setProperty('--p', max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)).toFixed(4) : 0);
+      var cur = null;
+      var line = window.innerHeight * 0.3;
+      for (var i = 0; i < sections.length; i++) {
+        if (sections[i].getBoundingClientRect().top <= line) cur = sections[i]; else break;
+      }
+      var id = cur ? cur.id : null;
+      activeKey = id ? id.replace(/^(fr|en|zh)-/, '') : null;
+      [].forEach.call(blocks[lang].querySelectorAll('.toc a'), function (a) {
+        var on = id && a.getAttribute('href') === '#' + id;
+        a.classList.toggle('on', !!on);
+        if (on) a.setAttribute('aria-current', 'true'); else a.removeAttribute('aria-current');
+      });
+    });
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll);
+
+  /* ---------- hash links such as #en-s5 ---------- */
+  window.addEventListener('hashchange', function () {
+    var m = /^#(fr|en|zh)(?:-|$)/.exec(location.hash || '');
+    if (m && m[1] !== lang) setLang(m[1], false);
+    var el = location.hash.length > 1 ? document.getElementById(location.hash.slice(1)) : null;
+    if (el) el.scrollIntoView({ block: 'start' });
+  });
+
+  /* ---------- PDF links ----------
+     On a normal web host the links download natively. Inside the Claude viewer, where
+     page-started downloads are blocked, they go through the `downloads` capability. */
+  var dlCap = null;
+  if (window.claude && typeof window.claude.use === 'function') {
+    try {
+      window.claude.use('downloads').then(function (d) { dlCap = d || null; }, function () { dlCap = null; });
+    } catch (e) { dlCap = null; }
+  }
+  [].forEach.call(document.querySelectorAll('a.dl'), function (a) {
+    a.addEventListener('click', function (ev) {
+      if (!dlCap) return;
+      ev.preventDefault();
+      fetch(a.getAttribute('href'))
+        .then(function (r) { if (!r.ok) throw new Error('fetch'); return r.arrayBuffer(); })
+        .then(function (buf) { return dlCap.save({ filename: a.getAttribute('data-file'), data: buf }); })
+        .catch(function (err) {
+          if (err && err.code === 'declined') return;
+          window.open(a.href, '_blank', 'noopener');
+        });
+    });
+  });
+
+  /* ---------- start ---------- */
+  var first = detectLang();
+  setLang(first, false);
+  if (location.hash.length > 1) {
+    var el = document.getElementById(location.hash.slice(1));
+    if (el) el.scrollIntoView({ block: 'start' });
+  }
+})();
+
 </script>
 </body>
 </html>
